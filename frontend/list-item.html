@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List an Item - OurStuff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/main.js" defer></script>
+
+    <style>
+        body {
+            background-color: #F8FAFC;
+        }
+
+        .list-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .list-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .list-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .list-header p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .list-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section-title .material-icons-outlined {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+            background: #FDFDFF;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .price-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .price-prefix {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .price-input {
+            padding-left: 32px;
+        }
+
+        /* Image Upload Styling */
+        .image-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #F8FAFC;
+        }
+
+        .image-upload-area:hover,
+        .image-upload-area.dragging {
+            border-color: var(--primary);
+            background: #EFF6FF;
+        }
+
+        .image-upload-area .material-icons-outlined {
+            font-size: 48px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .image-preview-item {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-preview {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Success Message Overlay */
+        #success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .success-box {
+            background: #fff;
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+        }
+
+        @keyframes checkPop {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .check-anim {
+            width: 80px;
+            height: 80px;
+            background: #10B981;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .list-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">
+            <img src="./images/logo.png" alt="OurStuff Logo">
+        </a>
+        <ul class="navbar-links">
+            <li><a href="browse.html">Browse Items</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="list-item.html" style="color:var(--primary); font-weight:700;">List an Item</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button class="btn-signin" id="btn-signin">Sign in / Login</button>
+            <div class="user-avatar" id="user-avatar" style="display:none;"></div>
+        </div>
+    </nav>
+
+    <div class="list-container">
+        <div class="list-header">
+            <h1>List Your Item</h1>
+            <p>Turn your idle stuff into extra cash in minutes.</p>
+        </div>
+
+        <div class="list-card">
+            <form id="list-item-form">
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <span class="material-icons-outlined">info</span>
+                        Basic Information
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="title">Item Title</label>
+                        <input type="text" id="title" class="form-input"
+                            placeholder="e.g. Bosch Professional Drill Machine" required>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" class="form-select" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Power Tools">Power Tools</option>
+                                <option value="Garden">Garden</option>
+                                <option value="Camping">Camping</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Kitchen">Kitchen</option>
+                                <option value="Music">Music</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Cleaning">Cleaning</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" class="form-input"
+                                placeholder="e.g. Indiranagar, Bangalore" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <span class="material-icons-outlined">payments</span>
+                        Pricing & Deposit
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="pricePerDay">Price Per Day</label>
+                            <div class="price-input-wrapper">
+                                <span class="price-prefix">₹</span>
+                                <input type="number" id="pricePerDay" class="form-input price-input" placeholder="0"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="deposit">Security Deposit (Keep it 0 for trust)</label>
+                            <div class="price-input-wrapper">
+                                <span class="price-prefix">₹</span>
+                                <input type="number" id="deposit" class="form-input price-input" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <span class="material-icons-outlined">description</span>
+                        Description
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="description">Tell us more about the item</label>
+                        <textarea id="description" class="form-textarea"
+                            placeholder="Describe condition, what's included, etc." required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <span class="material-icons-outlined">photo_library</span>
+                        Photos
+                    </div>
+                    <input type="file" id="images" multiple accept="image/*" style="display: none;">
+                    <div class="image-upload-area" onclick="document.getElementById('images').click()">
+                        <span class="material-icons-outlined">cloud_upload</span>
+                        <p>Click to upload photos</p>
+                        <span style="font-size: 12px; color: var(--text-muted);">Max 5 photos. High quality images get
+                            3x more rentals.</span>
+                    </div>
+                    <div class="image-preview-grid" id="image-preview-grid"></div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submit-btn">
+                    <span class="material-icons-outlined">add_circle</span>
+                    List Item Now
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="success-overlay">
+        <div class="success-box">
+            <div class="check-anim">
+                <span class="material-icons-outlined" style="font-size: 40px;">check</span>
+            </div>
+            <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">Listed Successfully!</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Your item is now live and people can start renting
+                it.</p>
+            <button class="btn-submit" onclick="window.location.href='browse.html'">Go to Browse</button>
+        </div>
+    </div>
+
+    <script>
+        // Check for verified user immediately
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof requireVerifiedUser === 'function') {
+                requireVerifiedUser('list-item.html');
+            }
+        });
+
+        const form = document.getElementById('list-item-form');
+        const imgInput = document.getElementById('images');
+        const previewGrid = document.getElementById('image-preview-grid');
+        let selectedFiles = [];
+
+        const uploadArea = document.querySelector('.image-upload-area');
+
+        // Handle file selection via input
+        imgInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        // Drag and Drop Logic
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragging'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragging'), false);
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            handleFiles(dt.files);
+        });
+
+        function handleFiles(files) {
+            const fileList = Array.from(files);
+
+            if (selectedFiles.length + fileList.length > 5) {
+                alert('You can only upload up to 5 images.');
+                return;
+            }
+
+            fileList.forEach(file => {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload image files only.');
+                    return;
+                }
+
+                selectedFiles.push(file);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}">
+                        <button type="button" class="remove-preview" onclick="removeImage(${selectedFiles.length - 1})">
+                            <span class="material-icons-outlined" style="font-size:12px;">close</span>
+                        </button>
+                    `;
+                    previewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeImage(index) {
+            selectedFiles.splice(index, 1);
+            renderPreviews();
+        }
+
+        function renderPreviews() {
+            previewGrid.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}">
+                        <button type="button" class="remove-preview" onclick="removeImage(${index})">
+                            <span class="material-icons-outlined" style="font-size:12px;">close</span>
+                        </button>
+                    `;
+                    previewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-icons-outlined spin">sync</span> Listing your item...';
+
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('pricePerDay', document.getElementById('pricePerDay').value);
+            formData.append('deposit', document.getElementById('deposit').value || 0);
+            formData.append('description', document.getElementById('description').value);
+
+            selectedFiles.forEach(file => {
+                formData.append('images', file);
+            });
+
+            try {
+                const res = await fetch('http://localhost:5000/api/items', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('success-overlay').style.display = 'flex';
+                } else {
+                    alert(data.message || 'Error listing item');
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'List Item Now';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'List Item Now';
+            }
+        });
+    </script>
+
+    <style>
+        .spin {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</body>
+
+</html>

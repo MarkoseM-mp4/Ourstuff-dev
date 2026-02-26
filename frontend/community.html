@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Feed - OurStuff</title>
+    <meta name="description"
+        content="Can't find what you need? Post a community request and let nearby users help you rent what you're looking for.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/community.css">
+
+    <!-- Shared JS -->
+    <script src="js/main.js" defer></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">
+            <img src="./images/logo.png" alt="OurStuff Logo">
+        </a>
+        <ul class="navbar-links">
+            <li><a href="browse.html">Browse Items</a></li>
+            <li><a href="community.html" class="nav-active">Community Feed</a></li>
+            <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button class="btn-signin" id="btn-signin">Sign in / Login</button>
+            <div class="user-avatar" id="user-avatar" style="display:none;">
+                <span class="material-icons-outlined">person</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="comm-hero">
+        <div class="comm-hero-content">
+            <h1 class="comm-hero-title">Community Requests</h1>
+            <p class="comm-hero-sub">Can't find what you need? Post a request — your neighbours have it!</p>
+            <button class="btn-post-request" id="btn-post-request">
+                <span class="material-icons-outlined">add_circle_outline</span>
+                Post a Request
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="comm-filters-bar">
+        <div class="comm-filters-inner">
+            <div class="filter-group">
+                <label for="filter-category">Category</label>
+                <select id="filter-category">
+                    <option value="">All Categories</option>
+                    <option value="Power Tools">Power Tools</option>
+                    <option value="Garden">Garden</option>
+                    <option value="Camping">Camping</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Music">Music</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Cleaning">Cleaning</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-location">Location</label>
+                <div class="filter-search-wrap">
+                    <span class="material-icons-outlined">location_on</span>
+                    <input type="text" id="filter-location" placeholder="e.g. Downtown">
+                </div>
+            </div>
+            <button class="btn-filter-apply" id="btn-filter-apply">
+                <span class="material-icons-outlined">tune</span>
+                Apply
+            </button>
+            <button class="btn-filter-clear" id="btn-filter-clear">Clear</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="comm-main">
+
+        <!-- Stats Bar -->
+        <div class="comm-stats-bar" id="comm-stats-bar">
+            <span id="stats-count">Loading requests...</span>
+        </div>
+
+        <!-- Requests Grid -->
+        <div class="comm-grid" id="comm-grid">
+            <!-- Filled by JS -->
+        </div>
+
+        <!-- Skeleton Loaders (shown while loading) -->
+        <div class="comm-grid" id="comm-skeleton" style="display:none;">
+            <div class="req-card skeleton-card" style="min-height:200px;"></div>
+            <div class="req-card skeleton-card" style="min-height:200px;"></div>
+            <div class="req-card skeleton-card" style="min-height:200px;"></div>
+            <div class="req-card skeleton-card" style="min-height:200px;"></div>
+            <div class="req-card skeleton-card" style="min-height:200px;"></div>
+            <div class="req-card skeleton-card" style="min-height:200px;"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="comm-empty" id="comm-empty" style="display:none;">
+            <span class="material-icons-outlined comm-empty-icon">inbox</span>
+            <h3>No requests found</h3>
+            <p>Be the first to post a community request!</p>
+            <button class="btn-post-request" id="btn-post-request-empty">
+                <span class="material-icons-outlined">add_circle_outline</span>
+                Post a Request
+            </button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="comm-pagination" id="comm-pagination" style="display:none;">
+            <button class="btn-page" id="btn-prev-page" disabled>
+                <span class="material-icons-outlined">chevron_left</span>
+                Previous
+            </button>
+            <span class="page-info" id="page-info">Page 1 of 1</span>
+            <button class="btn-page" id="btn-next-page" disabled>
+                Next
+                <span class="material-icons-outlined">chevron_right</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MODAL: Post a Request
+         ============================================= -->
+    <div class="modal-overlay" id="modal-post" role="dialog" aria-modal="true" aria-labelledby="modal-post-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modal-post-title">Post a Community Request</h2>
+                <button class="modal-close" id="modal-post-close" aria-label="Close">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <form id="form-post-request" novalidate>
+                <div class="form-group">
+                    <label for="req-item-name">What do you need? <span class="req-star">*</span></label>
+                    <input type="text" id="req-item-name" placeholder="e.g. Circular Saw, Projector, Kayak" required
+                        maxlength="80">
+                </div>
+                <div class="form-group">
+                    <label for="req-description">Description</label>
+                    <textarea id="req-description" rows="3"
+                        placeholder="Any specific requirements? Model, accessories, condition..."
+                        maxlength="400"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="req-category">Category <span class="req-star">*</span></label>
+                        <select id="req-category" required>
+                            <option value="">Select category</option>
+                            <option value="Power Tools">Power Tools</option>
+                            <option value="Garden">Garden</option>
+                            <option value="Camping">Camping</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Kitchen">Kitchen</option>
+                            <option value="Music">Music</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Cleaning">Cleaning</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="req-budget">Budget / day ($) <span class="req-star">*</span></label>
+                        <input type="number" id="req-budget" placeholder="e.g. 15" min="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="req-location">Location <span class="req-star">*</span></label>
+                    <input type="text" id="req-location" placeholder="e.g. Downtown, Riverside" required
+                        maxlength="100">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="req-from-date">From Date <span class="req-star">*</span></label>
+                        <input type="date" id="req-from-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="req-to-date">To Date <span class="req-star">*</span></label>
+                        <input type="date" id="req-to-date" required>
+                    </div>
+                </div>
+                <label class="checkbox-label" for="req-urgent">
+                    <input type="checkbox" id="req-urgent">
+                    <span class="checkbox-custom"></span>
+                    Mark as Urgent
+                </label>
+                <div class="modal-error" id="modal-post-error" style="display:none;"></div>
+                <button type="submit" class="btn-modal-submit" id="btn-submit-request">
+                    <span class="material-icons-outlined">send</span>
+                    Submit Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MODAL: Respond to a Request
+         ============================================= -->
+    <div class="modal-overlay" id="modal-respond" role="dialog" aria-modal="true" aria-labelledby="modal-respond-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modal-respond-title">Respond to Request</h2>
+                <button class="modal-close" id="modal-respond-close" aria-label="Close">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="respond-item-name" id="respond-item-name"><!-- filled by JS --></div>
+            <form id="form-respond" novalidate>
+                <div class="form-group">
+                    <label for="respond-message">Your message <span class="req-star">*</span></label>
+                    <textarea id="respond-message" rows="4"
+                        placeholder="Tell them what you have, your availability, etc." required
+                        maxlength="500"></textarea>
+                </div>
+                <div class="modal-error" id="modal-respond-error" style="display:none;"></div>
+                <button type="submit" class="btn-modal-submit" id="btn-submit-respond">
+                    <span class="material-icons-outlined">reply</span>
+                    Send Response
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/community.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pot body -->
+  <path d="M14 28H50V48C50 50.2 48.2 52 46 52H18C15.8 52 14 50.2 14 48V28Z" fill="#0D9488"/>
+  <path d="M16 30H48V47C48 48.7 46.7 50 45 50H19C17.3 50 16 48.7 16 47V30Z" fill="#0D9488" opacity="0.7"/>
+  <!-- Lid -->
+  <path d="M12 28H52C52 24 42 22 32 22C22 22 12 24 12 28Z" fill="#2563EB"/>
+  <ellipse cx="32" cy="27" rx="20" ry="3" fill="#2563EB" opacity="0.8"/>
+  <!-- Lid handle -->
+  <rect x="28" y="16" width="8" height="4" rx="2" fill="#F59E0B"/>
+  <rect x="30" y="14" width="4" height="4" rx="1" fill="#F59E0B" opacity="0.8"/>
+  <!-- Handle left -->
+  <rect x="6" y="34" width="8" height="4" rx="2" fill="#F59E0B" opacity="0.7"/>
+  <!-- Handle right -->
+  <rect x="50" y="34" width="8" height="4" rx="2" fill="#F59E0B" opacity="0.7"/>
+  <!-- Steam lines -->
+  <path d="M24 14C24 12 25 10 24 8" stroke="#0D9488" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M32 13C32 11 33 9 32 7" stroke="#0D9488" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M40 14C40 12 41 10 40 8" stroke="#0D9488" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Pot shine -->
+  <line x1="20" y1="32" x2="20" y2="44" stroke="white" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+</svg>

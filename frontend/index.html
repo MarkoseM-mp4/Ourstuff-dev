@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OurStuff - Rent & Share. Anything.</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Tom Select (for city search) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <style>
+        .nav-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 12px;
+            margin-left: 20px;
+            min-width: 200px;
+            transition: all 0.2s;
+        }
+
+        .nav-location:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-location .ts-wrapper {
+            border: none !important;
+            padding: 0 !important;
+            min-height: unset !important;
+            background: transparent !important;
+        }
+
+        .nav-location .ts-wrapper .items {
+            padding: 0 !important;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            background: transparent !important;
+        }
+
+        .nav-location .ts-control {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        .gps-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .gps-btn:hover {
+            background: #EFF6FF;
+        }
+
+        /* Hero Search Adjustments */
+        .search-bar {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            padding-right: 8px;
+        }
+
+        @media (max-width: 850px) {
+            .nav-location {
+                display: none;
+            }
+        }
+    </style>
+
+    <!-- Custom script -->
+    <script src="js/main.js" defer></script>
+</head>
+
+<body>
+    <!-- ========================================
+         LOADING SCREEN OVERLAY
+         ======================================== -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="shapes-container">
+            <div class="shape shape-diamond-bl"></div>
+            <div class="shape shape-square-bl"></div>
+            <div class="shape shape-circle-bl"></div>
+            <div class="shape shape-circle-br"></div>
+            <div class="shape shape-square-br"></div>
+            <div class="shape shape-triangle-br"></div>
+        </div>
+
+        <div class="logo-section">
+            <img src="./images/logo.png" alt="OurStuff - Rent & Share. Anything." class="loading-logo-image" />
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         HOME SCREEN
+         ======================================== -->
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="navbar-logo">
+            <img src="./images/logo.png" alt="OurStuff Logo">
+        </a>
+        <div class="nav-location">
+            <span class="material-icons-outlined" style="color:var(--text-muted); font-size:20px;">location_on</span>
+            <select id="location-picker" placeholder="Select City..."></select>
+            <div class="gps-btn" id="gps-btn" title="Use current location">
+                <span class="material-icons-outlined" style="font-size:20px;">my_location</span>
+            </div>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="browse.html">Browse Items</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="#help">Help</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button class="btn-signin" id="btn-signin">Sign in / Login</button>
+            <div class="user-avatar" id="user-avatar">
+                <span class="material-icons-outlined">person</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="hero" id="hero">
+        <img src="./images/banner.png" alt="People sharing items" class="hero-image">
+        <div class="hero-overlay">
+            <h1 class="hero-title">Rent & Share. Anything</h1>
+            <p class="hero-subtitle">Find what you need, or lend what you don't</p>
+            <div class="search-bar" id="search-bar">
+                <input type="text" placeholder="Search for items to rent…" id="search-input">
+                <button class="search-btn" id="search-btn" onclick="goSearch()">
+                    <span class="material-icons-outlined">search</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Browse Section -->
+    <div class="main-content">
+        <h2 class="section-title" id="browse">Browse</h2>
+        <div class="browse-grid" id="browse-grid">
+            <div class="browse-card" id="card-power-tools" onclick="location.href='browse.html?category=Power+Tools'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/power-tools.png" alt="Power tools">
+                </div>
+                <span class="browse-card-label">Power tools</span>
+            </div>
+            <div class="browse-card" id="card-garden" onclick="location.href='browse.html?category=Garden'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/garden.png" alt="Garden">
+                </div>
+                <span class="browse-card-label">Garden</span>
+            </div>
+            <div class="browse-card" id="card-camping" onclick="location.href='browse.html?category=Camping'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/camping.png" alt="Camping">
+                </div>
+                <span class="browse-card-label">Camping</span>
+            </div>
+            <div class="browse-card" id="card-electronics" onclick="location.href='browse.html?category=Electronics'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/electronics.png" alt="Electronics">
+                </div>
+                <span class="browse-card-label">Electronics</span>
+            </div>
+            <div class="browse-card" id="card-sports" onclick="location.href='browse.html?category=Sports'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/sports.png" alt="Sports">
+                </div>
+                <span class="browse-card-label">Sports</span>
+            </div>
+            <div class="browse-card" id="card-kitchen" onclick="location.href='browse.html?category=Kitchen'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/kitchen.svg" alt="Kitchen">
+                </div>
+                <span class="browse-card-label">Kitchen</span>
+            </div>
+            <div class="browse-card" id="card-music" onclick="location.href='browse.html?category=Music'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/music.png" alt="Music">
+                </div>
+                <span class="browse-card-label">Music</span>
+            </div>
+            <div class="browse-card" id="card-furniture" onclick="location.href='browse.html?category=Furniture'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/furniture.svg" alt="Furniture">
+                </div>
+                <span class="browse-card-label">Furniture</span>
+            </div>
+            <div class="browse-card" id="card-cleaning" onclick="location.href='browse.html?category=Cleaning'"
+                style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/cleaning.png" alt="Cleaning">
+                </div>
+                <span class="browse-card-label">Cleaning</span>
+            </div>
+            <div class="browse-card" id="card-more" onclick="location.href='browse.html'" style="cursor:pointer">
+                <div class="browse-card-icon">
+                    <img src="./images/icons/more.svg" alt="More">
+                </div>
+                <span class="browse-card-label">More</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Button -->
+    <div class="cta-section">
+        <button class="btn-cta" id="btn-join">Join our Community</button>
+    </div>
+
+    <script>
+        let locSelect;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Tom Select for worldwide city search
+            locSelect = new TomSelect('#location-picker', {
+                valueField: 'name',
+                labelField: 'display',
+                searchField: 'display',
+                placeholder: 'Anywhere',
+                load: function (query, callback) {
+                    if (!query.length) return callback();
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city&addressdetails=1&limit=5`;
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            const res = json.map(item => {
+                                const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
+                                const country = item.address.country;
+                                return {
+                                    name: city,
+                                    display: `${city}, ${country}`
+                                };
+                            });
+                            callback(res);
+                        }).catch(() => {
+                            callback();
+                        });
+                },
+                render: {
+                    option: function (item, escape) {
+                        return `<div class="py-2 px-3">
+                            <div class="font-bold">${escape(item.name)}</div>
+                            <div class="text-xs text-gray-500">${escape(item.display)}</div>
+                        </div>`;
+                    }
+                }
+            });
+
+            // Load saved location
+            const savedLoc = localStorage.getItem('user_location');
+            if (savedLoc) {
+                locSelect.addOption({ name: savedLoc, display: savedLoc });
+                locSelect.setValue(savedLoc);
+            }
+
+            // GPS Logic
+            document.getElementById('gps-btn').addEventListener('click', () => {
+                const btn = document.getElementById('gps-btn');
+                btn.innerHTML = '<span class="material-icons-outlined spin" style="font-size:20px;">sync</span>';
+
+                if (!navigator.geolocation) {
+                    alert('Geolocation is not supported by your browser');
+                    btn.innerHTML = '<span class="material-icons-outlined" style="font-size:20px;">my_location</span>';
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`;
+
+                        fetch(url)
+                            .then(res => res.json())
+                            .then(data => {
+                                const city = data.address.city || data.address.town || data.address.village || 'Unknown Location';
+                                locSelect.addOption({ name: city, display: city });
+                                locSelect.setValue(city);
+                                localStorage.setItem('user_location', city);
+                            })
+                            .finally(() => {
+                                btn.innerHTML = '<span class="material-icons-outlined" style="font-size:20px;">my_location</span>';
+                            });
+                    },
+                    (err) => {
+                        alert('Unable to retrieve your location');
+                        btn.innerHTML = '<span class="material-icons-outlined" style="font-size:20px;">my_location</span>';
+                    }
+                );
+            });
+
+            // Save location on change
+            locSelect.on('change', (val) => {
+                localStorage.setItem('user_location', val);
+            });
+        });
+
+        function goSearch() {
+            const q = document.getElementById('search-input').value.trim();
+            const l = localStorage.getItem('user_location') || '';
+
+            let url = 'browse.html?';
+            if (q) url += 'search=' + encodeURIComponent(q) + '&';
+            if (l) url += 'location=' + encodeURIComponent(l);
+
+            window.location.href = url;
+        }
+
+        document.getElementById('search-input').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') goSearch();
+        });
+    </script>
+
+    <style>
+        .spin {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+</body>
+
+</html>

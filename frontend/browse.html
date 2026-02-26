@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Items - OurStuff</title>
+    <meta name="description"
+        content="Browse peer-to-peer rental items near you. Search by category, price and location.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/main.js" defer></script>
+
+    <style>
+        /* =============================================
+           BROWSE PAGE STYLES
+           ============================================= */
+        body {
+            background: #F0F4FF;
+        }
+
+        /* ── Page header ── */
+        .browse-header {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            padding: 40px 24px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .browse-header::before,
+        .browse-header::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .browse-header::before {
+            width: 260px;
+            height: 260px;
+            right: -60px;
+            top: -80px;
+        }
+
+        .browse-header::after {
+            width: 160px;
+            height: 160px;
+            left: -40px;
+            bottom: -60px;
+        }
+
+        .browse-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 0 6px;
+        }
+
+        .browse-header p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.75);
+            margin: 0;
+        }
+
+        /* ── Search + filters card (pulls up over hero) ── */
+        .filter-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+            padding: 20px;
+            margin: -32px 24px 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .filter-search-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .filter-search-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 0 14px;
+            gap: 8px;
+            background: var(--bg);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filter-search-wrap:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+            background: #fff;
+        }
+
+        .filter-search-wrap .material-icons-outlined {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .filter-search-wrap input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            padding: 12px 0;
+            flex: 1;
+            width: 100%;
+        }
+
+        .btn-filter-search {
+            padding: 12px 22px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-filter-search:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Filter chips row */
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .filter-select {
+            appearance: none;
+            padding: 7px 32px 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 99px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%2364748B' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-price-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .price-input {
+            width: 80px;
+            padding: 7px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 99px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .price-input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-chips-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .btn-clear-filters {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .btn-clear-filters:hover {
+            background: #EFF6FF;
+        }
+
+        /* ── Results bar ── */
+        .results-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            margin-bottom: 16px;
+        }
+
+        .results-count {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .results-count strong {
+            color: var(--text);
+        }
+
+        .sort-select {
+            appearance: none;
+            padding: 7px 28px 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%2364748B' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 8px center;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* ── Item grid ── */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+            padding: 0 24px 48px;
+        }
+
+        /* ── Item card ── */
+        .item-card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+        }
+
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10);
+            border-color: #BFDBFE;
+        }
+
+        .item-card-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #EFF6FF;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .item-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .item-card:hover .item-card-img img {
+            transform: scale(1.05);
+        }
+
+        .item-card-img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .item-card-img-placeholder .material-icons-outlined {
+            font-size: 40px;
+            color: #93C5FD;
+        }
+
+        .item-card-img-placeholder span.ph-label {
+            font-size: 12px;
+            color: #93C5FD;
+            font-weight: 500;
+        }
+
+        /* Availability badge */
+        .item-avail-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(16, 185, 129, 0.9);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 99px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Category chip */
+        .item-cat-chip {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 99px;
+            backdrop-filter: blur(4px);
+        }
+
+        .item-card-body {
+            padding: 14px 16px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 6px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .item-card-meta .material-icons-outlined {
+            font-size: 13px;
+        }
+
+        .item-card-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .item-card-rating .material-icons-outlined {
+            font-size: 13px;
+            color: #F59E0B;
+        }
+
+        .item-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .item-price {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .item-price span {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .btn-view {
+            padding: 8px 18px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-view:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .empty-state .material-icons-outlined {
+            font-size: 56px;
+            color: #BFDBFE;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 6px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0 0 20px;
+        }
+
+        .btn-post-request {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-post-request:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+
+        /* ── Skeleton loader ── */
+        .skeleton {
+            background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .skeleton-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+        }
+
+        .skeleton-body {
+            padding: 14px 16px 16px;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-line.w80 {
+            width: 80%;
+        }
+
+        .skeleton-line.w50 {
+            width: 50%;
+        }
+
+        .skeleton-line.w30 {
+            width: 30%;
+        }
+
+        /* ── Pagination ── */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 0 24px 48px;
+        }
+
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .page-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 600px) {
+            .browse-header {
+                padding: 28px 16px 52px;
+            }
+
+            .filter-card {
+                margin: -28px 12px 20px;
+                padding: 14px;
+            }
+
+            .items-grid {
+                padding: 0 12px 40px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .results-bar {
+                padding: 0 12px;
+            }
+
+            .filter-chips {
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Navbar ── -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">
+            <img src="./images/logo.png" alt="OurStuff Logo">
+        </a>
+        <ul class="navbar-links">
+            <li><a href="browse.html" style="color:var(--primary);font-weight:700;">Browse Items</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="index.html#help">Help</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button class="btn-signin" id="btn-signin" onclick="location.href='login.html'">Sign in / Login</button>
+            <div class="user-avatar" id="user-avatar" style="display:none;">
+                <span class="material-icons-outlined">person</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Page header ── -->
+    <div class="browse-header">
+        <h1>Browse Items</h1>
+        <p>Find what you need from your community</p>
+    </div>
+
+    <!-- ── Filter card ── -->
+    <div style="max-width:1200px;margin:0 auto;padding:0;">
+        <div class="filter-card">
+            <!-- Search row -->
+            <div class="filter-search-row">
+                <div class="filter-search-wrap">
+                    <span class="material-icons-outlined">search</span>
+                    <input type="text" id="search-input" placeholder="Search items…" autocomplete="off">
+                </div>
+                <button class="btn-filter-search" id="btn-search">
+                    <span class="material-icons-outlined">search</span>
+                    Search
+                </button>
+            </div>
+
+            <!-- Filter chips -->
+            <div class="filter-chips">
+                <span class="filter-chips-label">Filters:</span>
+
+                <select class="filter-select" id="filter-category">
+                    <option value="">All Categories</option>
+                    <option value="Power Tools">🔧 Power Tools</option>
+                    <option value="Garden">🌿 Garden</option>
+                    <option value="Camping">⛺ Camping</option>
+                    <option value="Electronics">💻 Electronics</option>
+                    <option value="Sports">🏀 Sports</option>
+                    <option value="Kitchen">🍳 Kitchen</option>
+                    <option value="Music">🎸 Music</option>
+                    <option value="Furniture">🪑 Furniture</option>
+                    <option value="Cleaning">🧹 Cleaning</option>
+                    <option value="Other">📦 Other</option>
+                </select>
+
+                <select class="filter-select" id="filter-location">
+                    <option value="">All Locations</option>
+                    <option value="Kottayam">Kottayam</option>
+                    <option value="Ernakulam">Ernakulam</option>
+                    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                    <option value="Kozhikode">Kozhikode</option>
+                    <option value="Thrissur">Thrissur</option>
+                    <option value="Alappuzha">Alappuzha</option>
+                </select>
+
+                <div class="filter-price-row">
+                    <span class="filter-chips-label">₹</span>
+                    <input class="price-input" type="number" id="filter-min-price" placeholder="Min" min="0">
+                    <span class="filter-chips-label">–</span>
+                    <input class="price-input" type="number" id="filter-max-price" placeholder="Max" min="0">
+                </div>
+
+                <button class="btn-clear-filters" id="btn-clear">✕ Clear</button>
+            </div>
+        </div>
+
+        <!-- ── Results bar ── -->
+        <div class="results-bar">
+            <div class="results-count" id="results-count">Loading…</div>
+            <select class="sort-select" id="sort-select">
+                <option value="newest">Newest first</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+            </select>
+        </div>
+
+        <!-- ── Item grid ── -->
+        <div class="items-grid" id="items-grid">
+            <!-- Skeleton loaders -->
+            <div class="skeleton-card" id="skel1">
+                <div class="skeleton skeleton-img"></div>
+                <div class="skeleton-body">
+                    <div class="skeleton skeleton-line w80"></div>
+                    <div class="skeleton skeleton-line w50"></div>
+                    <div class="skeleton skeleton-line w30"></div>
+                </div>
+            </div>
+            <div class="skeleton-card" id="skel2">
+                <div class="skeleton skeleton-img"></div>
+                <div class="skeleton-body">
+                    <div class="skeleton skeleton-line w80"></div>
+                    <div class="skeleton skeleton-line w50"></div>
+                    <div class="skeleton skeleton-line w30"></div>
+                </div>
+            </div>
+            <div class="skeleton-card" id="skel3">
+                <div class="skeleton skeleton-img"></div>
+                <div class="skeleton-body">
+                    <div class="skeleton skeleton-line w80"></div>
+                    <div class="skeleton skeleton-line w50"></div>
+                    <div class="skeleton skeleton-line w30"></div>
+                </div>
+            </div>
+            <div class="skeleton-card" id="skel4">
+                <div class="skeleton skeleton-img"></div>
+                <div class="skeleton-body">
+                    <div class="skeleton skeleton-line w80"></div>
+                    <div class="skeleton skeleton-line w50"></div>
+                    <div class="skeleton skeleton-line w30"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Pagination ── -->
+        <div class="pagination" id="pagination"></div>
+
+    </div><!-- /max-width wrapper -->
+
+    <script>
+        const BROWSE_API = 'http://localhost:5000/api';
+        const BROWSE_MEDIA = 'http://localhost:5000';  // for image paths
+
+        // ─── State ────────────────────────────────────────────────────
+        let currentPage = 1;
+        let totalPages = 1;
+        let activeParams = {};
+
+        // ─── Category icon map ────────────────────────────────────────
+        const catIcons = {
+            'Power Tools': 'construction',
+            'Garden': 'yard',
+            'Camping': 'camping',
+            'Electronics': 'laptop',
+            'Sports': 'sports_basketball',
+            'Kitchen': 'restaurant',
+            'Music': 'music_note',
+            'Furniture': 'chair',
+            'Cleaning': 'cleaning_services',
+            'Other': 'inventory_2',
+        };
+
+        // ─── Fetch & render items ─────────────────────────────────────
+        async function loadItems(page = 1) {
+            currentPage = page;
+            const grid = document.getElementById('items-grid');
+
+            // Show skeletons
+            grid.innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(() => `
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-img"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton skeleton-line w80"></div>
+                        <div class="skeleton skeleton-line w50"></div>
+                        <div class="skeleton skeleton-line w30"></div>
+                    </div>
+                </div>`).join('');
+
+            // Build query string
+            const params = new URLSearchParams({
+                page,
+                limit: 12,
+                ...activeParams,
+            });
+            // Remove sort — handled client-side after fetch for simplicity
+            params.delete('sort');
+
+            try {
+                const res = await fetch(`${BROWSE_API}/items?${params}`);
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message);
+
+                totalPages = data.pages || 1;
+                let items = [...data.items];
+
+                // Client-side sort
+                const sort = document.getElementById('sort-select').value;
+                if (sort === 'price-asc') items.sort((a, b) => a.pricePerDay - b.pricePerDay);
+                if (sort === 'price-desc') items.sort((a, b) => b.pricePerDay - a.pricePerDay);
+                if (sort === 'rating') items.sort((a, b) => b.rating - a.rating);
+
+                renderItems(items, data.total);
+                renderPagination();
+
+            } catch (e) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons-outlined">wifi_off</span>
+                        <h3>Couldn't load items</h3>
+                        <p>${e.message || 'Make sure the server is running.'}</p>
+                        <button class="btn-post-request" onclick="loadItems(1)" style="padding:9px 21px;font-size:18px;gap:6px;">
+                            <span class="material-icons-outlined" style="font-size:19px;">refresh</span> Retry
+                        </button>
+                    </div>`;
+                document.getElementById('results-count').textContent = '';
+                document.getElementById('pagination').innerHTML = '';
+            }
+        }
+
+        function renderItems(items, total) {
+            const grid = document.getElementById('items-grid');
+            document.getElementById('results-count').innerHTML =
+                `<strong>${total}</strong> item${total !== 1 ? 's' : ''} found`;
+
+            if (!items.length) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons-outlined">search_off</span>
+                        <h3>No items found</h3>
+                        <p>Try different search terms, or post a community request.</p>
+                        <a href="community.html" class="btn-post-request" style="padding:9px 21px;font-size:18px;gap:6px;">
+                            Post a Request
+                        </a>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => {
+                const img = item.images && item.images.length
+                    ? `<img src="${BROWSE_MEDIA}${item.images[0]}" alt="${item.title}" loading="lazy">`
+                    : `<div class="item-card-img-placeholder">
+                           <span class="material-icons-outlined">${catIcons[item.category] || 'inventory_2'}</span>
+                           <span class="ph-label">${item.category}</span>
+                       </div>`;
+
+                const stars = renderStars(item.rating);
+                const ratingText = item.reviewCount > 0
+                    ? `${item.rating.toFixed(1)} (${item.reviewCount})`
+                    : 'No reviews yet';
+
+                return `
+                <a class="item-card" href="item.html?id=${item._id}">
+                    <div class="item-card-img">
+                        ${img}
+                        <span class="item-avail-badge">Available</span>
+                        <span class="item-cat-chip">${item.category}</span>
+                    </div>
+                    <div class="item-card-body">
+                        <div class="item-card-title">${item.title}</div>
+                        <div class="item-card-meta">
+                            <span class="material-icons-outlined">location_on</span>
+                            ${item.location}
+                        </div>
+                        <div class="item-card-rating">
+                            ${stars}
+                            <span>${ratingText}</span>
+                        </div>
+                        <div class="item-card-footer">
+                            <div class="item-price">
+                                ₹${item.pricePerDay}<span>/day</span>
+                            </div>
+                            <button class="btn-view">View</button>
+                        </div>
+                    </div>
+                </a>`;
+            }).join('');
+        }
+
+        function renderStars(rating) {
+            return Array.from({ length: 5 }, (_, i) => {
+                const filled = i < Math.round(rating);
+                return `<span class="material-icons-outlined" style="font-size:13px;color:${filled ? '#F59E0B' : '#CBD5E1'}">star</span>`;
+            }).join('');
+        }
+
+        function renderPagination() {
+            const pag = document.getElementById('pagination');
+            if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+            let html = '';
+            // Prev
+            html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="loadItems(${currentPage - 1})">
+                         <span class="material-icons-outlined" style="font-size:16px;">chevron_left</span>
+                     </button>`;
+            // Pages
+            for (let p = 1; p <= totalPages; p++) {
+                if (totalPages > 7 && p > 2 && p < totalPages - 1 && Math.abs(p - currentPage) > 1) {
+                    if (p === 3 || p === totalPages - 2) html += `<span style="padding:0 4px;color:var(--text-muted);">…</span>`;
+                    continue;
+                }
+                html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="loadItems(${p})">${p}</button>`;
+            }
+            // Next
+            html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="loadItems(${currentPage + 1})">
+                         <span class="material-icons-outlined" style="font-size:16px;">chevron_right</span>
+                     </button>`;
+            pag.innerHTML = html;
+        }
+
+        // ─── Search & filter actions ──────────────────────────────────
+        function applyFilters() {
+            const search = document.getElementById('search-input').value.trim();
+            const category = document.getElementById('filter-category').value;
+            const location = document.getElementById('filter-location').value;
+            const minPrice = document.getElementById('filter-min-price').value;
+            const maxPrice = document.getElementById('filter-max-price').value;
+
+            activeParams = {};
+            if (search) activeParams.search = search;
+            if (category) activeParams.category = category;
+            if (location) activeParams.location = location;
+            if (minPrice) activeParams.minPrice = minPrice;
+            if (maxPrice) activeParams.maxPrice = maxPrice;
+
+            loadItems(1);
+        }
+
+        document.getElementById('btn-search').addEventListener('click', applyFilters);
+        document.getElementById('search-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') applyFilters();
+        });
+
+        // Live filter on select change
+        ['filter-category', 'filter-location', 'sort-select'].forEach(id => {
+            document.getElementById(id).addEventListener('change', applyFilters);
+        });
+
+        // Clear all filters
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-category').value = '';
+            document.getElementById('filter-location').value = '';
+            document.getElementById('filter-min-price').value = '';
+            document.getElementById('filter-max-price').value = '';
+            activeParams = {};
+            loadItems(1);
+        });
+
+        // ─── Pre-fill search from index.html query param ──────────────
+        const urlParams = new URLSearchParams(window.location.search);
+        const preSearch = urlParams.get('search') || urlParams.get('q');
+        if (preSearch) {
+            document.getElementById('search-input').value = preSearch;
+            activeParams.search = preSearch;
+        }
+
+        const preCat = urlParams.get('category');
+        if (preCat) {
+            document.getElementById('filter-category').value = preCat;
+            activeParams.category = preCat;
+        }
+
+        // ─── Initial load ─────────────────────────────────────────────
+        loadItems(1);
+    </script>
+
+</body>
+
+</html>
