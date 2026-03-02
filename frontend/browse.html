@@ -12,6 +12,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Tom Select (for city search) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <link rel="stylesheet" href="css/style.css">
     <script src="js/main.js" defer></script>
 
@@ -458,6 +463,7 @@
         .btn-post-request {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
             padding: 7px 14px;
             background: var(--primary);
@@ -609,12 +615,13 @@
     <!-- ── Navbar ── -->
     <nav class="navbar" id="navbar">
         <a href="index.html" class="navbar-logo">
-            <img src="./images/logo.png" alt="OurStuff Logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
         </a>
         <ul class="navbar-links">
-            <li><a href="browse.html" style="color:var(--primary);font-weight:700;">Browse Items</a></li>
+            <li><a href="browse.html" style="color:#CBD5E1;font-weight:700;">Browse Items</a></li>
             <li><a href="community.html">Community</a></li>
             <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="index.html#help">Help</a></li>
         </ul>
         <div class="navbar-actions">
@@ -664,14 +671,14 @@
                     <option value="Other">📦 Other</option>
                 </select>
 
-                <select class="filter-select" id="filter-location">
-                    <option value="">All Locations</option>
-                    <option value="Kottayam">Kottayam</option>
-                    <option value="Ernakulam">Ernakulam</option>
-                    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-                    <option value="Kozhikode">Kozhikode</option>
-                    <option value="Thrissur">Thrissur</option>
-                    <option value="Alappuzha">Alappuzha</option>
+                <select class="filter-select" id="filter-location" style="min-width:180px;"
+                    placeholder="Search city..."></select>
+
+                <select class="filter-select" id="filter-radius" style="display:none; max-width:120px;">
+                    <option value="10">Within 10 km</option>
+                    <option value="50">Within 50 km</option>
+                    <option value="100">Within 100 km</option>
+                    <option value="200">Within 200 km</option>
                 </select>
 
                 <div class="filter-price-row">
@@ -739,8 +746,8 @@
     </div><!-- /max-width wrapper -->
 
     <script>
-        const BROWSE_API = 'http://localhost:5000/api';
-        const BROWSE_MEDIA = 'http://localhost:5000';  // for image paths
+        const BROWSE_API = 'http://127.0.0.1:5000/api';
+        const BROWSE_MEDIA = 'http://127.0.0.1:5000';  // for image paths
 
         // ─── State ────────────────────────────────────────────────────
         let currentPage = 1;
@@ -797,9 +804,9 @@
 
                 // Client-side sort
                 const sort = document.getElementById('sort-select').value;
-                if (sort === 'price-asc') items.sort((a, b) => a.pricePerDay - b.pricePerDay);
-                if (sort === 'price-desc') items.sort((a, b) => b.pricePerDay - a.pricePerDay);
-                if (sort === 'rating') items.sort((a, b) => b.rating - a.rating);
+                if (sort === 'price-asc') items.sort((a, b) => (a.pricePerDay || 0) - (b.pricePerDay || 0));
+                if (sort === 'price-desc') items.sort((a, b) => (b.pricePerDay || 0) - (a.pricePerDay || 0));
+                if (sort === 'rating') items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
                 renderItems(items, data.total);
                 renderPagination();
@@ -810,8 +817,8 @@
                         <span class="material-icons-outlined">wifi_off</span>
                         <h3>Couldn't load items</h3>
                         <p>${e.message || 'Make sure the server is running.'}</p>
-                        <button class="btn-post-request" onclick="loadItems(1)" style="padding:9px 21px;font-size:18px;gap:6px;">
-                            <span class="material-icons-outlined" style="font-size:19px;">refresh</span> Retry
+                        <button class="btn-post-request" onclick="loadItems(1)" style="padding:9px 21px;font-size:18px;gap:6px;justify-content:center;align-items:center;">
+                            <span class="material-icons-outlined" style="font-size:19px;">refresh</span>Retry
                         </button>
                     </div>`;
                 document.getElementById('results-count').textContent = '';
@@ -839,7 +846,7 @@
 
             grid.innerHTML = items.map(item => {
                 const img = item.images && item.images.length
-                    ? `<img src="${BROWSE_MEDIA}${item.images[0]}" alt="${item.title}" loading="lazy">`
+                    ? `<img src="${item.images[0].startsWith('http') ? item.images[0] : BROWSE_MEDIA + item.images[0]}" alt="${item.title}" loading="lazy">`
                     : `<div class="item-card-img-placeholder">
                            <span class="material-icons-outlined">${catIcons[item.category] || 'inventory_2'}</span>
                            <span class="ph-label">${item.category}</span>
@@ -851,7 +858,7 @@
                     : 'No reviews yet';
 
                 return `
-                <a class="item-card" href="item.html?id=${item._id}">
+                <a class="item-card" href="item?id=${item._id}">
                     <div class="item-card-img">
                         ${img}
                         <span class="item-avail-badge">Available</span>
@@ -909,61 +916,201 @@
             pag.innerHTML = html;
         }
 
+        let locSelect;
+        let selectedLat = null;
+        let selectedLng = null;
+
         // ─── Search & filter actions ──────────────────────────────────
-        function applyFilters() {
+        function applyFilters(pushState = true) {
             const search = document.getElementById('search-input').value.trim();
             const category = document.getElementById('filter-category').value;
             const location = document.getElementById('filter-location').value;
             const minPrice = document.getElementById('filter-min-price').value;
             const maxPrice = document.getElementById('filter-max-price').value;
+            const sort = document.getElementById('sort-select').value;
+            const radius = document.getElementById('filter-radius').value;
 
             activeParams = {};
             if (search) activeParams.search = search;
             if (category) activeParams.category = category;
             if (location) activeParams.location = location;
+            if (location && selectedLat && selectedLng) {
+                activeParams.lat = selectedLat;
+                activeParams.lng = selectedLng;
+                activeParams.radius = radius;
+            }
             if (minPrice) activeParams.minPrice = minPrice;
             if (maxPrice) activeParams.maxPrice = maxPrice;
+            if (sort && sort !== 'newest') activeParams.sort = sort;
+
+            // Keep URL in sync so filters survive refresh / can be shared
+            if (pushState) {
+                const qs = new URLSearchParams(activeParams);
+                const newUrl = qs.toString()
+                    ? `${window.location.pathname}?${qs}`
+                    : window.location.pathname;
+                window.history.pushState({}, '', newUrl);
+            }
 
             loadItems(1);
         }
 
-        document.getElementById('btn-search').addEventListener('click', applyFilters);
+        document.getElementById('btn-search').addEventListener('click', () => applyFilters());
         document.getElementById('search-input').addEventListener('keydown', e => {
             if (e.key === 'Enter') applyFilters();
         });
 
+        // Price inputs: apply on Enter key
+        ['filter-min-price', 'filter-max-price'].forEach(id => {
+            document.getElementById(id).addEventListener('keydown', e => {
+                if (e.key === 'Enter') applyFilters();
+            });
+            // Also apply on blur (when user tabs away)
+            document.getElementById(id).addEventListener('blur', () => applyFilters());
+        });
+
         // Live filter on select change
-        ['filter-category', 'filter-location', 'sort-select'].forEach(id => {
-            document.getElementById(id).addEventListener('change', applyFilters);
+        ['filter-category', 'sort-select'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => applyFilters());
         });
 
         // Clear all filters
         document.getElementById('btn-clear').addEventListener('click', () => {
             document.getElementById('search-input').value = '';
             document.getElementById('filter-category').value = '';
-            document.getElementById('filter-location').value = '';
+            if (locSelect) locSelect.clear(true);
             document.getElementById('filter-min-price').value = '';
             document.getElementById('filter-max-price').value = '';
+            document.getElementById('sort-select').value = 'newest';
+            document.getElementById('filter-radius').style.display = 'none';
+            selectedLat = null;
+            selectedLng = null;
             activeParams = {};
+            window.history.pushState({}, '', window.location.pathname);
             loadItems(1);
         });
 
-        // ─── Pre-fill search from index.html query param ──────────────
-        const urlParams = new URLSearchParams(window.location.search);
-        const preSearch = urlParams.get('search') || urlParams.get('q');
-        if (preSearch) {
-            document.getElementById('search-input').value = preSearch;
-            activeParams.search = preSearch;
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Tom Select for location
+            locSelect = new TomSelect('#filter-location', {
+                valueField: 'name',
+                labelField: 'display',
+                searchField: 'display',
+                placeholder: 'Anywhere',
+                load: function (query, callback) {
+                    if (!query.length) return callback();
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city&addressdetails=1&limit=5`;
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            const res = json.map(item => {
+                                const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
+                                return {
+                                    name: city,
+                                    display: `${city}, ${item.address.country}`,
+                                    lat: item.lat,
+                                    lon: item.lon
+                                };
+                            });
+                            // Filter duplicates
+                            const uniqueRes = Array.from(new Set(res.map(a => a.name)))
+                                .map(name => res.find(a => a.name === name));
+                            callback(uniqueRes);
+                        }).catch(() => {
+                            callback();
+                        });
+                },
+                onChange: function (value) {
+                    if (value) {
+                        const option = this.options[value];
+                        selectedLat = option.lat;
+                        selectedLng = option.lon;
+                        document.getElementById('filter-radius').style.display = 'inline-block';
+                    } else {
+                        selectedLat = null;
+                        selectedLng = null;
+                        document.getElementById('filter-radius').style.display = 'none';
+                    }
+                    applyFilters();
+                },
+                render: {
+                    option: function (item, escape) {
+                        return `<div class="py-2 px-3">
+                            <div class="font-bold">${escape(item.name)}</div>
+                            <div class="text-xs text-gray-500">${escape(item.display)}</div>
+                        </div>`;
+                    }
+                }
+            });
 
-        const preCat = urlParams.get('category');
-        if (preCat) {
-            document.getElementById('filter-category').value = preCat;
-            activeParams.category = preCat;
-        }
+            // Handle filter radius changes
+            document.getElementById('filter-radius').addEventListener('change', () => applyFilters());
 
-        // ─── Initial load ─────────────────────────────────────────────
-        loadItems(1);
+            // ─── Pre-fill ALL filters from URL query params ───────────────
+            const urlParams = new URLSearchParams(window.location.search);
+
+            const preSearch = urlParams.get('search') || urlParams.get('q') || '';
+            const preCat = urlParams.get('category') || '';
+            const preLoc = urlParams.get('location') || '';
+            const preLat = urlParams.get('lat') || '';
+            const preLng = urlParams.get('lng') || '';
+            const preRadius = urlParams.get('radius') || '';
+            const preMin = urlParams.get('minPrice') || '';
+            const preMax = urlParams.get('maxPrice') || '';
+            const preSort = urlParams.get('sort') || 'newest';
+
+            if (preSearch) document.getElementById('search-input').value = preSearch;
+            if (preCat) document.getElementById('filter-category').value = preCat;
+            if (preLoc) {
+                locSelect.addOption({ name: preLoc, display: preLoc, lat: preLat, lon: preLng });
+                locSelect.setValue(preLoc);
+                if (preRadius) document.getElementById('filter-radius').value = preRadius;
+            }
+            if (preMin) document.getElementById('filter-min-price').value = preMin;
+            if (preMax) document.getElementById('filter-max-price').value = preMax;
+            if (preSort) document.getElementById('sort-select').value = preSort;
+
+            if (preSearch) activeParams.search = preSearch;
+            if (preCat) activeParams.category = preCat;
+            if (preLoc) {
+                activeParams.location = preLoc;
+                if (preLat && preLng) {
+                    activeParams.lat = preLat;
+                    activeParams.lng = preLng;
+                    activeParams.radius = preRadius;
+                    selectedLat = preLat;
+                    selectedLng = preLng;
+                    document.getElementById('filter-radius').style.display = 'inline-block';
+                }
+            }
+            if (preMin) activeParams.minPrice = preMin;
+            if (preMax) activeParams.maxPrice = preMax;
+            if (preSort && preSort !== 'newest') activeParams.sort = preSort;
+
+            // Handle browser back/forward — re-apply URL params
+            window.addEventListener('popstate', () => {
+                const p = new URLSearchParams(window.location.search);
+                document.getElementById('search-input').value = p.get('search') || p.get('q') || '';
+                document.getElementById('filter-category').value = p.get('category') || '';
+
+                const loc = p.get('location');
+                if (loc) {
+                    locSelect.addOption({ name: loc, display: loc, lat: p.get('lat'), lon: p.get('lng') });
+                    locSelect.setValue(loc);
+                    if (p.get('radius')) document.getElementById('filter-radius').value = p.get('radius');
+                } else {
+                    locSelect.clear();
+                }
+
+                document.getElementById('filter-min-price').value = p.get('minPrice') || '';
+                document.getElementById('filter-max-price').value = p.get('maxPrice') || '';
+                document.getElementById('sort-select').value = p.get('sort') || 'newest';
+                applyFilters(false); // don't push state again
+            });
+
+            // ─── Initial load ─────────────────────────────────────────────
+            loadItems(1);
+        });
     </script>
 
 </body>

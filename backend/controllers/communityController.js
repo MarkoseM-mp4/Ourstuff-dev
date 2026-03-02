@@ -1,16 +1,40 @@
 const CommunityRequest = require('../models/CommunityRequest');
 const Notification = require('../models/Notification');
 
+// @desc    Get a single community request by ID
+// @route   GET /api/community/:id
+// @access  Public
+const getCommunityRequest = async (req, res, next) => {
+    try {
+        const request = await CommunityRequest.findById(req.params.id)
+            .populate('requester', 'name avatar isVerified location')
+            .populate('responses.responder', 'name avatar isVerified');
+        if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+        res.json({ success: true, request });
+    } catch (err) {
+        next(err);
+    }
+};
+
 // @desc    Get all open community requests
 // @route   GET /api/community
 // @access  Public
 const getCommunityRequests = async (req, res, next) => {
     try {
-        const { category, location, page = 1, limit = 12 } = req.query;
+        const { category, location, lat, lng, radius, page = 1, limit = 12 } = req.query;
         const query = { status: 'open' };
 
         if (category) query.category = category;
         if (location) query.location = new RegExp(location, 'i');
+
+        if (lat && lng && radius) {
+            query.coordinates = {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [Number(lng), Number(lat)] },
+                    $maxDistance: Number(radius) * 1000
+                }
+            };
+        }
 
         const skip = (Number(page) - 1) * Number(limit);
         const [requests, total] = await Promise.all([
@@ -39,9 +63,9 @@ const getCommunityRequests = async (req, res, next) => {
 // @access  Private
 const createCommunityRequest = async (req, res, next) => {
     try {
-        const { itemName, description, category, budget, location, fromDate, toDate, isUrgent } = req.body;
+        const { itemName, description, category, budget, location, fromDate, toDate, isUrgent, lat, lng } = req.body;
 
-        const request = await CommunityRequest.create({
+        const requestData = {
             requester: req.user._id,
             itemName,
             description,
@@ -51,7 +75,13 @@ const createCommunityRequest = async (req, res, next) => {
             fromDate,
             toDate,
             isUrgent: isUrgent || false,
-        });
+        };
+
+        if (lat && lng) {
+            requestData.coordinates = [Number(lng), Number(lat)];
+        }
+
+        const request = await CommunityRequest.create(requestData);
 
         res.status(201).json({ success: true, request });
     } catch (err) {
@@ -114,6 +144,7 @@ const deleteCommunityRequest = async (req, res, next) => {
 };
 
 module.exports = {
+    getCommunityRequest,
     getCommunityRequests,
     createCommunityRequest,
     respondToCommunityRequest,

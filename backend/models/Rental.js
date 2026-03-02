@@ -45,10 +45,23 @@ const rentalSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    deliveryOtp: {
+        type: String,
+    },
+    returnOtp: {
+        type: String,
+    },
+    deliveredAt: {
+        type: Date,
+    },
     reviewedByRenter: { type: Boolean, default: false },
     reviewedByOwner: { type: Boolean, default: false },
 }, {
     timestamps: true,
 });
+
+rentalSchema.index({ owner: 1, createdAt: -1 });
+rentalSchema.index({ renter: 1, createdAt: -1 });
+rentalSchema.index({ status: 1 });
 
 module.exports = mongoose.model('Rental', rentalSchema);

@@ -24,8 +24,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #fff;
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 4px 12px;
             border-radius: 12px;
             margin-left: 20px;
@@ -34,8 +34,8 @@
         }
 
         .nav-location:hover {
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .nav-location .ts-wrapper {
@@ -49,7 +49,7 @@
             padding: 0 !important;
             font-size: 14px;
             font-weight: 600;
-            color: var(--text);
+            color: #fff;
             background: transparent !important;
         }
 
@@ -63,7 +63,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary);
+            color: #fff;
             cursor: pointer;
             padding: 4px;
             border-radius: 8px;
@@ -71,7 +71,7 @@
         }
 
         .gps-btn:hover {
-            background: #EFF6FF;
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* Hero Search Adjustments */
@@ -98,17 +98,8 @@
          LOADING SCREEN OVERLAY
          ======================================== -->
     <div class="loading-screen" id="loading-screen">
-        <div class="shapes-container">
-            <div class="shape shape-diamond-bl"></div>
-            <div class="shape shape-square-bl"></div>
-            <div class="shape shape-circle-bl"></div>
-            <div class="shape shape-circle-br"></div>
-            <div class="shape shape-square-br"></div>
-            <div class="shape shape-triangle-br"></div>
-        </div>
-
         <div class="logo-section">
-            <img src="./images/logo.png" alt="OurStuff - Rent & Share. Anything." class="loading-logo-image" />
+            <img src="./images/logo-white.png" alt="OurStuff - Rent & Share. Anything." class="loading-logo-image" />
             <div class="loading-dots">
                 <div class="dot"></div>
                 <div class="dot"></div>
@@ -124,20 +115,15 @@
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <a href="#" class="navbar-logo">
-            <img src="./images/logo.png" alt="OurStuff Logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
         </a>
-        <div class="nav-location">
-            <span class="material-icons-outlined" style="color:var(--text-muted); font-size:20px;">location_on</span>
-            <select id="location-picker" placeholder="Select City..."></select>
-            <div class="gps-btn" id="gps-btn" title="Use current location">
-                <span class="material-icons-outlined" style="font-size:20px;">my_location</span>
-            </div>
-        </div>
+
         <ul class="navbar-links">
             <li><a href="browse.html">Browse Items</a></li>
-            <li><a href="#how">How it works</a></li>
+            <li><a href="community.html">Community</a></li>
             <li><a href="list-item.html">List an Item</a></li>
-            <li><a href="#help">Help</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
         </ul>
         <div class="navbar-actions">
             <button class="btn-signin" id="btn-signin">Sign in / Login</button>
@@ -239,105 +225,58 @@
         </div>
     </div>
 
+    <!-- Help Section -->
+    <div class="main-content" id="help">
+        <h2 class="section-title">Help & FAQ</h2>
+        <div class="help-grid">
+            <div class="help-card">
+                <span class="material-icons-outlined help-icon">support_agent</span>
+                <h3>How to rent an item?</h3>
+                <p>Search for what you need, check availability, and request to rent. Once accepted, arrange a pickup
+                    with the owner.</p>
+            </div>
+            <div class="help-card">
+                <span class="material-icons-outlined help-icon">shield</span>
+                <h3>Is my item safe?</h3>
+                <p>We verify all users and offer security deposits to ensure your items are returned in the condition
+                    they were lent.</p>
+            </div>
+            <div class="help-card">
+                <span class="material-icons-outlined help-icon">payments</span>
+                <h3>How do payments work?</h3>
+                <p>Payments are handled person-to-person directly between the user and owner via individual UPI IDs for
+                    instant and easy transfers.</p>
+            </div>
+            <div class="help-card">
+                <span class="material-icons-outlined help-icon">published_with_changes</span>
+                <h3>Can I cancel?</h3>
+                <p>Yes, you can cancel up to 24 hours before the rental starts for a full refund. Later cancellations
+                    may incur a fee.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- CTA Button -->
     <div class="cta-section">
         <button class="btn-cta" id="btn-join">Join our Community</button>
     </div>
 
     <script>
-        let locSelect;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Tom Select for worldwide city search
-            locSelect = new TomSelect('#location-picker', {
-                valueField: 'name',
-                labelField: 'display',
-                searchField: 'display',
-                placeholder: 'Anywhere',
-                load: function (query, callback) {
-                    if (!query.length) return callback();
-                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city&addressdetails=1&limit=5`;
-                    fetch(url)
-                        .then(response => response.json())
-                        .then(json => {
-                            const res = json.map(item => {
-                                const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
-                                const country = item.address.country;
-                                return {
-                                    name: city,
-                                    display: `${city}, ${country}`
-                                };
-                            });
-                            callback(res);
-                        }).catch(() => {
-                            callback();
-                        });
-                },
-                render: {
-                    option: function (item, escape) {
-                        return `<div class="py-2 px-3">
-                            <div class="font-bold">${escape(item.name)}</div>
-                            <div class="text-xs text-gray-500">${escape(item.display)}</div>
-                        </div>`;
-                    }
-                }
-            });
 
-            // Load saved location
-            const savedLoc = localStorage.getItem('user_location');
-            if (savedLoc) {
-                locSelect.addOption({ name: savedLoc, display: savedLoc });
-                locSelect.setValue(savedLoc);
+        // Hide Join CTA if logged in
+        if (localStorage.getItem('token')) {
+            const ctaSection = document.querySelector('.cta-section');
+            if (ctaSection) {
+                ctaSection.style.display = 'none';
             }
-
-            // GPS Logic
-            document.getElementById('gps-btn').addEventListener('click', () => {
-                const btn = document.getElementById('gps-btn');
-                btn.innerHTML = '<span class="material-icons-outlined spin" style="font-size:20px;">sync</span>';
-
-                if (!navigator.geolocation) {
-                    alert('Geolocation is not supported by your browser');
-                    btn.innerHTML = '<span class="material-icons-outlined" style="font-size:20px;">my_location</span>';
-                    return;
-                }
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`;
-
-                        fetch(url)
-                            .then(res => res.json())
-                            .then(data => {
-                                const city = data.address.city || data.address.town || data.address.village || 'Unknown Location';
-                                locSelect.addOption({ name: city, display: city });
-                                locSelect.setValue(city);
-                                localStorage.setItem('user_location', city);
-                            })
-                            .finally(() => {
-                                btn.innerHTML = '<span class="material-icons-outlined" style="font-size:20px;">my_location</span>';
-                            });
-                    },
-                    (err) => {
-                        alert('Unable to retrieve your location');
-                        btn.innerHTML = '<span class="material-icons-outlined" style="font-size:20px;">my_location</span>';
-                    }
-                );
-            });
-
-            // Save location on change
-            locSelect.on('change', (val) => {
-                localStorage.setItem('user_location', val);
-            });
-        });
+        }
 
         function goSearch() {
             const q = document.getElementById('search-input').value.trim();
-            const l = localStorage.getItem('user_location') || '';
 
             let url = 'browse.html?';
-            if (q) url += 'search=' + encodeURIComponent(q) + '&';
-            if (l) url += 'location=' + encodeURIComponent(l);
+            if (q) url += 'search=' + encodeURIComponent(q);
 
             window.location.href = url;
         }

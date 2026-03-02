@@ -18,6 +18,10 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/community.css">
 
+    <!-- Tom Select (for city search) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <!-- Shared JS -->
     <script src="js/main.js" defer></script>
 </head>
@@ -26,13 +30,14 @@
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <a href="index.html" class="navbar-logo">
-            <img src="./images/logo.png" alt="OurStuff Logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
         </a>
         <ul class="navbar-links">
             <li><a href="browse.html">Browse Items</a></li>
-            <li><a href="community.html" class="nav-active">Community Feed</a></li>
+            <li><a href="community.html" class="nav-active">Community</a></li>
             <li><a href="list-item.html">List an Item</a></li>
             <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
         </ul>
         <div class="navbar-actions">
             <button class="btn-signin" id="btn-signin">Sign in / Login</button>
@@ -77,7 +82,7 @@
                 <label for="filter-location">Location</label>
                 <div class="filter-search-wrap">
                     <span class="material-icons-outlined">location_on</span>
-                    <input type="text" id="filter-location" placeholder="e.g. Downtown">
+                    <select id="filter-location" placeholder="Search city…"></select>
                 </div>
             </div>
             <button class="btn-filter-apply" id="btn-filter-apply">
@@ -113,12 +118,12 @@
 
         <!-- Empty State -->
         <div class="comm-empty" id="comm-empty" style="display:none;">
-            <span class="material-icons-outlined comm-empty-icon">inbox</span>
-            <h3>No requests found</h3>
-            <p>Be the first to post a community request!</p>
+            <span class="material-icons-outlined comm-empty-icon">forum</span>
+            <h3>No requests yet</h3>
+            <p>Be the first to post a request — your neighbours are ready to help!</p>
             <button class="btn-post-request" id="btn-post-request-empty">
                 <span class="material-icons-outlined">add_circle_outline</span>
-                Post a Request
+                Post the First Request
             </button>
         </div>
 
@@ -177,14 +182,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="req-budget">Budget / day ($) <span class="req-star">*</span></label>
+                        <label for="req-budget">Budget / day <span class="req-star">*</span></label>
                         <input type="number" id="req-budget" placeholder="e.g. 15" min="0" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="req-location">Location <span class="req-star">*</span></label>
-                    <input type="text" id="req-location" placeholder="e.g. Downtown, Riverside" required
-                        maxlength="100">
+                    <select id="req-location" required placeholder="Search your city…"></select>
+                    <input type="hidden" id="req-lat">
+                    <input type="hidden" id="req-lng">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -242,6 +248,63 @@
     <div class="toast" id="toast"></div>
 
     <script src="js/community.js"></script>
+    <script>
+        // ── Set today as min on date inputs ────────────────────────────
+        const _today = new Date().toISOString().split('T')[0];
+        document.getElementById('req-from-date').min = _today;
+        document.getElementById('req-to-date').min = _today;
+        document.getElementById('req-from-date').addEventListener('change', function () {
+            if (this.value < _today) this.value = _today;
+            document.getElementById('req-to-date').min = this.value;
+        });
+        document.getElementById('req-to-date').addEventListener('change', function () {
+            if (this.value < _today) this.value = _today;
+        });
+
+        // ── TomSelect helper function ──────────────────────────────────
+        function initLocationSelect(selector, onChange) {
+            return new TomSelect(selector, {
+                valueField: 'name',
+                labelField: 'display',
+                searchField: 'display',
+                placeholder: 'Search for a city…',
+                load: function (query, callback) {
+                    if (!query.length) return callback();
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city&addressdetails=1&limit=5`;
+                    fetch(url)
+                        .then(r => r.json())
+                        .then(json => {
+                            const res = json.map(item => {
+                                const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
+                                return { name: city, display: `${city}, ${item.address.country}`, lat: item.lat, lon: item.lon };
+                            });
+                            const unique = Array.from(new Set(res.map(a => a.name))).map(n => res.find(a => a.name === n));
+                            callback(unique);
+                        }).catch(() => callback());
+                },
+                onChange: function (value) {
+                    if (onChange) onChange(value ? this.options[value] : null);
+                },
+                render: {
+                    option: (item, escape) => `<div><div style="font-weight:600">${escape(item.name)}</div><div style="font-size:12px;color:#64748b">${escape(item.display)}</div></div>`,
+                    item: (item, escape) => `<div>${escape(item.name)}</div>`,
+                    no_results: () => `<div style="padding:8px 12px;color:#64748b;">No cities found</div>`,
+                }
+            });
+        }
+
+        // ── Filter location ────────────────────────────────────────────
+        let filterLocData = { name: '', lat: null, lng: null };
+        initLocationSelect('#filter-location', (opt) => {
+            filterLocData = opt ? { name: opt.name, lat: opt.lat, lng: opt.lon } : { name: '', lat: null, lng: null };
+        });
+
+        // ── Modal location ─────────────────────────────────────────────
+        let modalLocData = { name: '', lat: null, lng: null };
+        initLocationSelect('#req-location', (opt) => {
+            modalLocData = opt ? { name: opt.name, lat: opt.lat, lng: opt.lon } : { name: '', lat: null, lng: null };
+        });
+    </script>
 </body>
 
 </html>

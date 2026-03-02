@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    coordinates: {
+        type: [Number], // [longitude, latitude]
+        index: '2dsphere',
+    },
     avatar: {
         type: String,
         default: null,

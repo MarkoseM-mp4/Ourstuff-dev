@@ -34,6 +34,10 @@ const communityRequestSchema = new mongoose.Schema({
         required: [true, 'Location is required'],
         trim: true,
     },
+    coordinates: {
+        type: [Number], // [longitude, latitude]
+        index: '2dsphere',
+    },
     fromDate: {
         type: Date,
         required: [true, 'Start date is required'],
@@ -62,5 +66,8 @@ const communityRequestSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+communityRequestSchema.index({ requester: 1, createdAt: -1 });
+communityRequestSchema.index({ status: 1 });
 
 module.exports = mongoose.model('CommunityRequest', communityRequestSchema);

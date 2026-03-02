@@ -23,11 +23,12 @@ const getUserProfile = async (req, res, next) => {
 // @access  Private
 const updateProfile = async (req, res, next) => {
     try {
-        const { name, phone, location, bio } = req.body;
-        const avatar = req.file ? `/uploads/${req.file.filename}` : undefined;
+        const { name, phone, location, bio, lat, lng } = req.body;
+        const avatar = req.file ? req.file.path : undefined;
 
         const updateData = { name, phone, location, bio };
         if (avatar) updateData.avatar = avatar;
+        if (lat && lng) updateData.coordinates = [Number(lng), Number(lat)];
 
         const user = await User.findByIdAndUpdate(
             req.user._id,
@@ -49,13 +50,13 @@ const getDashboard = async (req, res, next) => {
         const userId = req.user._id;
 
         const [myListings, myRentals, myRequests, unreadNotifications] = await Promise.all([
-            Item.find({ owner: userId }).sort({ createdAt: -1 }).limit(10),
+            Item.find({ owner: userId }).sort({ createdAt: -1 }).limit(10).lean(),
             Rental.find({ renter: userId })
                 .populate('item', 'title images pricePerDay')
                 .populate('owner', 'name avatar')
                 .sort({ createdAt: -1 })
-                .limit(10),
-            CommunityRequest.find({ requester: userId }).sort({ createdAt: -1 }).limit(10),
+                .limit(10).lean(),
+            CommunityRequest.find({ requester: userId }).sort({ createdAt: -1 }).limit(10).lean(),
             require('../models/Notification').countDocuments({ recipient: userId, isRead: false }),
         ]);
 

@@ -10,6 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Tom Select (for city search) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <script src="js/main.js" defer></script>
 
     <style>
@@ -290,12 +295,15 @@
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <a href="index.html" class="navbar-logo">
-            <img src="./images/logo.png" alt="OurStuff Logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
         </a>
         <ul class="navbar-links">
             <li><a href="browse.html">Browse Items</a></li>
             <li><a href="community.html">Community</a></li>
-            <li><a href="list-item.html" style="color:var(--primary); font-weight:700;">List an Item</a></li>
+            <li><a href="list-item.html" class="nav-active" style="color:#CBD5E1;font-weight:700;">List an
+                    Item</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
         </ul>
         <div class="navbar-actions">
             <button class="btn-signin" id="btn-signin">Sign in / Login</button>
@@ -340,8 +348,7 @@
                         </div>
                         <div class="form-group">
                             <label for="location">Location</label>
-                            <input type="text" id="location" class="form-input"
-                                placeholder="e.g. Indiranagar, Bangalore" required>
+                            <select id="location" class="form-select" placeholder="Search for your city..." required></select>
                         </div>
                     </div>
                 </div>
@@ -418,11 +425,60 @@
     </div>
 
     <script>
+        let locationData = { lat: null, lng: null, name: '' };
+
         // Check for verified user immediately
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof requireVerifiedUser === 'function') {
                 requireVerifiedUser('list-item.html');
             }
+
+            // Initialize Tom Select for location
+            new TomSelect('#location', {
+                valueField: 'name',
+                labelField: 'display',
+                searchField: 'display',
+                placeholder: 'Search for your city...',
+                load: function (query, callback) {
+                    if (!query.length) return callback();
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city&addressdetails=1&limit=5`;
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            const res = json.map(item => {
+                                const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
+                                return {
+                                    name: city,
+                                    display: `${city}, ${item.address.country}`,
+                                    lat: item.lat,
+                                    lon: item.lon
+                                };
+                            });
+                            // Filter out duplicates by name
+                            const uniqueRes = Array.from(new Set(res.map(a => a.name)))
+                                .map(name => res.find(a => a.name === name));
+                            callback(uniqueRes);
+                        }).catch(() => {
+                            callback();
+                        });
+                },
+                onChange: function(value) {
+                    if(value) {
+                        const option = this.options[value];
+                        locationData = { lat: option.lat, lng: option.lon, name: option.name };
+                    } else {
+                        locationData = { lat: null, lng: null, name: '' };
+                    }
+                },
+                render: {
+                    option: function (item, escape) {
+                        return `<div class="py-2 px-3">
+                            <div class="font-bold">${escape(item.name)}</div>
+                            <div class="text-xs text-gray-500">${escape(item.display)}</div>
+                        </div>`;
+                    }
+                }
+            });
         });
 
         const form = document.getElementById('list-item-form');
@@ -525,7 +581,11 @@
             const formData = new FormData();
             formData.append('title', document.getElementById('title').value);
             formData.append('category', document.getElementById('category').value);
-            formData.append('location', document.getElementById('location').value);
+            formData.append('location', locationData.name || document.getElementById('location').value);
+            if (locationData.lat && locationData.lng) {
+                formData.append('lat', locationData.lat);
+                formData.append('lng', locationData.lng);
+            }
             formData.append('pricePerDay', document.getElementById('pricePerDay').value);
             formData.append('deposit', document.getElementById('deposit').value || 0);
             formData.append('description', document.getElementById('description').value);
@@ -535,7 +595,7 @@
             });
 
             try {
-                const res = await fetch('http://localhost:5000/api/items', {
+                const res = await fetch(`${API}/items`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - OurStuff</title>
+    <meta name="description" content="Manage your listings, rentals, community requests and notifications on OurStuff.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <script src="js/main.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
+        </a>
+        <ul class="navbar-links">
+            <li><a href="browse.html">Browse Items</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="dashboard.html" class="nav-active">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button class="btn-signin" id="btn-signin">Sign in / Login</button>
+            <div class="user-avatar" id="user-avatar" style="display:none;">
+                <span class="material-icons-outlined">person</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="dash-header">
+        <div class="dash-header-inner">
+            <div class="dash-user-info">
+                <div class="dash-avatar" id="dash-avatar">M</div>
+                <div>
+                    <h1 class="dash-username" id="dash-username">Loading…</h1>
+                    <p class="dash-email" id="dash-email"></p>
+                </div>
+            </div>
+            <div class="dash-stats-row" id="dash-stats-row">
+                <div class="dash-stat">
+                    <span class="dash-stat-num" id="stat-listings">—</span>
+                    <span class="dash-stat-label">Listings</span>
+                </div>
+                <div class="dash-stat-divider"></div>
+                <div class="dash-stat">
+                    <span class="dash-stat-num" id="stat-rentals">—</span>
+                    <span class="dash-stat-label">Rentals</span>
+                </div>
+                <div class="dash-stat-divider"></div>
+                <div class="dash-stat">
+                    <span class="dash-stat-num" id="stat-requests">—</span>
+                    <span class="dash-stat-label">Requests</span>
+                </div>
+                <div class="dash-stat-divider"></div>
+                <div class="dash-stat">
+                    <span class="dash-stat-num dash-notif-num" id="stat-notifs">—</span>
+                    <span class="dash-stat-label">Unread</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="dash-tabs-bar">
+        <div class="dash-tabs">
+            <button class="dash-tab active" data-tab="listings">
+                <span class="material-icons-outlined">inventory_2</span>
+                My Listings
+            </button>
+            <button class="dash-tab" data-tab="rentals">
+                <span class="material-icons-outlined">shopping_bag</span>
+                Active Rentals
+            </button>
+            <button class="dash-tab" data-tab="rental-history">
+                <span class="material-icons-outlined">history</span>
+                Rental History
+            </button>
+            <button class="dash-tab" data-tab="owner-rentals">
+                <span class="material-icons-outlined">storefront</span>
+                Incoming Rentals
+            </button>
+            <button class="dash-tab" data-tab="requests">
+                <span class="material-icons-outlined">forum</span>
+                My Requests
+            </button>
+            <button class="dash-tab" data-tab="notifications">
+                <span class="material-icons-outlined">notifications_none</span>
+                Notifications
+                <span class="notif-dot" id="notif-dot" style="display:none;"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="dash-main">
+
+        <!-- ===== LISTINGS TAB ===== -->
+        <div class="tab-panel active" id="tab-listings">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">My Listings</h2>
+                <a href="list-item.html" class="btn-panel-action">
+                    <span class="material-icons-outlined">add</span> New Listing
+                </a>
+            </div>
+            <div class="panel-grid" id="listings-grid">
+                <div class="panel-skeleton"></div>
+                <div class="panel-skeleton"></div>
+                <div class="panel-skeleton"></div>
+            </div>
+            <div class="panel-empty" id="listings-empty" style="display:none;">
+                <span class="material-icons-outlined panel-empty-icon">inventory_2</span>
+                <p>You haven't listed anything yet.</p>
+                <a href="list-item.html" class="btn-panel-action">List your first item</a>
+            </div>
+        </div>
+
+        <!-- ===== RENTALS TAB (as renter - Active) ===== -->
+        <div class="tab-panel" id="tab-rentals">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">Active & Upcoming Rentals</h2>
+            </div>
+            <div class="rental-list" id="rentals-list">
+                <div class="panel-skeleton full-width"></div>
+                <div class="panel-skeleton full-width"></div>
+            </div>
+            <div class="panel-empty" id="rentals-empty" style="display:none;">
+                <span class="material-icons-outlined panel-empty-icon">shopping_bag</span>
+                <p>You have no active or upcoming rentals.</p>
+                <a href="browse.html" class="btn-panel-action">Browse items</a>
+            </div>
+        </div>
+
+        <!-- ===== RENTAL HISTORY TAB (as renter - History) ===== -->
+        <div class="tab-panel" id="tab-rental-history">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">Rental History</h2>
+            </div>
+            <div class="rental-list" id="rental-history-list">
+                <div class="panel-skeleton full-width"></div>
+                <div class="panel-skeleton full-width"></div>
+            </div>
+            <div class="panel-empty" id="rental-history-empty" style="display:none;">
+                <span class="material-icons-outlined panel-empty-icon">history</span>
+                <p>You have no past rental history.</p>
+            </div>
+        </div>
+
+        <!-- ===== OWNER RENTALS TAB ===== -->
+        <div class="tab-panel" id="tab-owner-rentals">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">Incoming Rental Requests</h2>
+                <span class="panel-subtitle">Requests from people who want to rent your items</span>
+            </div>
+            <div class="rental-list" id="owner-rentals-list">
+                <div class="panel-skeleton full-width"></div>
+                <div class="panel-skeleton full-width"></div>
+            </div>
+            <div class="panel-empty" id="owner-rentals-empty" style="display:none;">
+                <span class="material-icons-outlined panel-empty-icon">storefront</span>
+                <p>No rental requests on your listings yet.</p>
+            </div>
+        </div>
+
+        <!-- ===== REQUESTS TAB ===== -->
+        <div class="tab-panel" id="tab-requests">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">My Community Requests</h2>
+                <a href="community.html" class="btn-panel-action">
+                    <span class="material-icons-outlined">add</span> New Request
+                </a>
+            </div>
+            <div class="panel-grid" id="requests-grid">
+                <div class="panel-skeleton"></div>
+                <div class="panel-skeleton"></div>
+            </div>
+            <div class="panel-empty" id="requests-empty" style="display:none;">
+                <span class="material-icons-outlined panel-empty-icon">forum</span>
+                <p>You haven't posted any community requests.</p>
+                <a href="community.html" class="btn-panel-action">Post a request</a>
+            </div>
+        </div>
+
+        <!-- ===== NOTIFICATIONS TAB ===== -->
+        <div class="tab-panel" id="tab-notifications">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">Notifications</h2>
+                <button class="btn-panel-action-ghost" id="btn-mark-all-read">
+                    <span class="material-icons-outlined">done_all</span> Mark all read
+                </button>
+            </div>
+            <div class="notif-list" id="notif-list">
+                <div class="panel-skeleton full-width"></div>
+                <div class="panel-skeleton full-width"></div>
+                <div class="panel-skeleton full-width"></div>
+            </div>
+            <div class="panel-empty" id="notif-empty" style="display:none;">
+                <span class="material-icons-outlined panel-empty-icon">notifications_none</span>
+                <p>You're all caught up!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- OTP Modal (Delivery OTP for Seller) -->
+    <div class="modal-overlay" id="otp-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="otp-modal-title">Verify Item Delivery</h2>
+                <button class="modal-close" onclick="document.getElementById('otp-modal').classList.remove('open')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);" id="otp-modal-desc">
+                Ask the buyer for their 6-digit delivery OTP to confirm the handover.
+            </p>
+            <div class="form-group">
+                <label>Enter OTP *</label>
+                <input type="text" id="otp-input" placeholder="e.g. 123456" maxlength="6">
+            </div>
+            <button class="btn-modal-submit" id="btn-submit-otp" style="margin-top: 10px;">
+                <span class="material-icons-outlined">check_circle</span>
+                Confirm Delivery
+            </button>
+        </div>
+    </div>
+
+    <!-- Return OTP Modal (Return OTP for Buyer) -->
+    <div class="modal-overlay" id="return-otp-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Complete Return</h2>
+                <button class="modal-close"
+                    onclick="document.getElementById('return-otp-modal').classList.remove('open')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);" id="return-otp-desc">
+                The return OTP has been sent to the seller. Please ask them for it and enter it below to confirm you've
+                returned the item.
+            </p>
+            <div class="form-group">
+                <label>Enter Return OTP *</label>
+                <input type="text" id="return-otp-input" placeholder="e.g. 654321" maxlength="6">
+            </div>
+            <button class="btn-modal-submit" id="btn-submit-return-otp" style="margin-top: 10px;">
+                <span class="material-icons-outlined">check_circle</span>
+                Confirm Return
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div class="modal-overlay" id="custom-confirm-modal">
+        <div class="modal-box" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; margin-bottom: 16px;">
+                <h2 id="ccm-title" style="font-size: 18px;">Are you sure?</h2>
+            </div>
+            <p id="ccm-desc" style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">
+                This action cannot be undone.
+            </p>
+            <div class="custom-confirm-buttons" style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn-panel-action-ghost" id="ccm-cancel" style="flex: 1; justify-content: center;">
+                    Cancel
+                </button>
+                <button class="btn-modal-submit" id="ccm-confirm" style="flex: 1; background: #DC2626;">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

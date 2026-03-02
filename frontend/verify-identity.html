@@ -523,12 +523,14 @@
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <a href="index.html" class="navbar-logo">
-            <img src="./images/logo.png" alt="OurStuff Logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
         </a>
         <ul class="navbar-links">
-            <li><a href="index.html#browse">Browse Items</a></li>
-            <li><a href="index.html#how">How it works</a></li>
-            <li><a href="index.html#list">List an Item</a></li>
+            <li><a href="browse.html">Browse Items</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
         </ul>
         <div class="navbar-actions">
             <div class="user-avatar" id="user-avatar">
@@ -641,7 +643,8 @@
                         <span class="material-icons-outlined">check_circle</span>
                         Verified User
                     </div>
-                    <button class="btn-primary" id="btn-go-home" onclick="window.location.href='index.html'">
+                    <button class="btn-primary" id="btn-go-home"
+                        onclick="const p=new URLSearchParams(window.location.search); window.location.href=p.get('redirect')||'index.html'">
                         Go to Home
                     </button>
                     <p class="redirect-note">Redirecting in <span id="countdown">5</span>s…</p>
@@ -831,7 +834,8 @@
                 el.textContent = n;
                 if (n <= 0) {
                     clearInterval(timer);
-                    window.location.href = 'index.html';
+                    const params = new URLSearchParams(window.location.search);
+                    window.location.href = params.get('redirect') || 'index.html';
                 }
             }, 1000);
         }

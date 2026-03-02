@@ -4,7 +4,7 @@
    Requires: main.js (provides API, getToken, isLoggedIn, isVerified, requireVerifiedUser)
    ============================================================ */
 
-const API_URL = (typeof API !== 'undefined') ? API : 'http://localhost:5000/api';
+const API_URL = (typeof API !== 'undefined') ? API : 'http://127.0.0.1:5000/api';
 
 // ---- State ----
 let currentPage = 1;
@@ -53,7 +53,7 @@ function avatarHTML(user) {
         const src = user.avatar.startsWith('http')
             ? user.avatar
             : `${API_URL.replace('/api', '')}${user.avatar}`;
-        return `<div class="req-avatar"><img src="${src}" alt="${user.name}" onerror="this.parentElement.textContent='${initial}'"></div>`;
+        return `<div class="req-avatar"><img src="${src}" alt="${user.name}" onerror="this.outerHTML='${initial}'"></div>`;
     }
     return `<div class="req-avatar">${initial}</div>`;
 }
@@ -166,11 +166,13 @@ async function loadRequests(page = 1) {
         totalPages = data.pages || 1;
         currentPage = data.page || 1;
 
-        // Stats bar
+        // Stats bar — hide it when no results (empty state handles the message)
         const statsEl = document.getElementById('stats-count');
+        const statsBar = document.getElementById('comm-stats-bar');
         if (data.total === 0) {
-            statsEl.textContent = 'No requests found';
+            statsBar.style.display = 'none';
         } else {
+            statsBar.style.display = 'block';
             const filterNote = (activeFilters.category || activeFilters.location)
                 ? ' (filtered)'
                 : '';
@@ -181,7 +183,7 @@ async function loadRequests(page = 1) {
         document.getElementById('comm-skeleton').style.display = 'none';
 
         if (requests.length === 0) {
-            document.getElementById('comm-empty').style.display = 'flex';
+            document.getElementById('comm-empty').style.display = 'block';
             document.getElementById('comm-grid').style.display = 'none';
         } else {
             const grid = document.getElementById('comm-grid');
@@ -204,8 +206,8 @@ async function loadRequests(page = 1) {
 
     } catch (err) {
         document.getElementById('comm-skeleton').style.display = 'none';
-        document.getElementById('comm-empty').style.display = 'flex';
-        document.getElementById('stats-count').textContent = 'Failed to load requests';
+        document.getElementById('comm-empty').style.display = 'block';
+        document.getElementById('comm-stats-bar').style.display = 'none';
         console.error('Community load error:', err);
     }
 }
@@ -250,7 +252,9 @@ async function submitPostRequest(e) {
     const description = document.getElementById('req-description').value.trim();
     const category = document.getElementById('req-category').value;
     const budget = parseFloat(document.getElementById('req-budget').value);
-    const location = document.getElementById('req-location').value.trim();
+    const location = (typeof modalLocData !== 'undefined' && modalLocData.name)
+        ? modalLocData.name
+        : document.getElementById('req-location').value.trim();
     const fromDate = document.getElementById('req-from-date').value;
     const toDate = document.getElementById('req-to-date').value;
     const isUrgent = document.getElementById('req-urgent').checked;
@@ -259,7 +263,7 @@ async function submitPostRequest(e) {
     if (!itemName) { showError(errEl, 'Please enter what you need.'); return; }
     if (!category) { showError(errEl, 'Please select a category.'); return; }
     if (isNaN(budget) || budget < 0) { showError(errEl, 'Please enter a valid budget.'); return; }
-    if (!location) { showError(errEl, 'Please enter a location.'); return; }
+    if (!location) { showError(errEl, 'Please select or type a location.'); return; }
     if (!fromDate || !toDate) { showError(errEl, 'Please select both dates.'); return; }
     if (new Date(fromDate) >= new Date(toDate)) { showError(errEl, 'End date must be after start date.'); return; }
 
@@ -359,13 +363,20 @@ function showError(el, msg) {
 // ============================================================
 function applyFilters() {
     activeFilters.category = document.getElementById('filter-category').value;
-    activeFilters.location = document.getElementById('filter-location').value.trim();
+    // Read from TomSelect data if available, else raw value
+    activeFilters.location = (typeof filterLocData !== 'undefined' && filterLocData.name)
+        ? filterLocData.name : '';
     loadRequests(1);
 }
 
 function clearFilters() {
     document.getElementById('filter-category').value = '';
-    document.getElementById('filter-location').value = '';
+    // Clear TomSelect picker
+    if (typeof filterLocData !== 'undefined') {
+        filterLocData = { name: '', lat: null, lng: null };
+        const el = document.getElementById('filter-location');
+        if (el && el._tomSelect) el._tomSelect.clear();
+    }
     activeFilters = { category: '', location: '' };
     loadRequests(1);
 }

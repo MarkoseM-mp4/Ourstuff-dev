@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Request - OurStuff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/main.js" defer></script>
+
+    <style>
+        body {
+            background: #F8FAFC;
+        }
+
+        .page-container {
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 24px 80px;
+        }
+
+        /* ── Back link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        /* ── Request Card ── */
+        .request-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 32px;
+        }
+
+        .request-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .request-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-badge.open {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .status-badge.responded {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        .status-badge.closed {
+            background: #F1F5F9;
+            color: #64748B;
+        }
+
+        .status-badge.urgent {
+            background: #FEF2F2;
+            color: #DC2626;
+        }
+
+        .request-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .request-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .request-meta-item .material-icons-outlined {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .request-meta-item strong {
+            color: var(--text);
+        }
+
+        .request-description {
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .requester-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .req-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #EFF6FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 18px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .req-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .req-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        .req-since {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .verified-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: #ECFDF5;
+            color: #059669;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        /* ── Danger zone (delete) ── */
+        .danger-zone {
+            border: 1.5px solid #FECACA;
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .danger-zone p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .danger-zone strong {
+            display: block;
+            font-size: 15px;
+            color: #DC2626;
+            margin-bottom: 4px;
+        }
+
+        .btn-delete {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #FEF2F2;
+            color: #DC2626;
+            border: 1.5px solid #FECACA;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-delete:hover {
+            background: #DC2626;
+            color: #fff;
+            border-color: #DC2626;
+        }
+
+        .btn-delete:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ── Responses section ── */
+        .section-heading {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-heading .material-icons-outlined {
+            color: var(--primary);
+        }
+
+        .response-count-badge {
+            background: var(--primary);
+            color: #fff;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .response-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .response-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.2s;
+        }
+
+        .response-card:hover {
+            box-shadow: var(--card-shadow);
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .resp-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #EFF6FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 16px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .resp-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .resp-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .resp-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .resp-message {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.65;
+            background: #F8FAFC;
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+
+        .no-responses {
+            text-align: center;
+            padding: 48px 24px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1.5px dashed var(--border);
+            color: var(--text-muted);
+        }
+
+        .no-responses .material-icons-outlined {
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: var(--border);
+        }
+
+        /* ── Error / Loading states ── */
+        .state-center {
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .state-center .material-icons-outlined {
+            font-size: 64px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .request-card {
+                padding: 20px;
+            }
+
+            .request-title {
+                font-size: 20px;
+            }
+
+            .danger-zone {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
+        </a>
+        <ul class="navbar-links">
+            <li><a href="browse.html">Browse Items</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <button class="btn-signin" id="btn-signin">Sign in / Login</button>
+            <div class="user-avatar" id="user-avatar" style="display:none;"></div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <!-- Back -->
+        <a href="dashboard.html" class="back-link" id="back-link">
+            <span class="material-icons-outlined">arrow_back</span>
+            Back to Dashboard
+        </a>
+
+        <!-- Loading -->
+        <div id="state-loading" class="state-center">
+            <span class="material-icons-outlined"
+                style="animation:spin 1.2s linear infinite;color:var(--primary);">sync</span>
+            <p style="margin-top:12px;color:var(--text-muted);">Loading request…</p>
+        </div>
+
+        <!-- Error -->
+        <div id="state-error" class="state-center" style="display:none;">
+            <span class="material-icons-outlined" style="color:#f87171;">error_outline</span>
+            <h2 id="error-title">Request not found</h2>
+            <p id="error-desc" style="color:var(--text-muted);margin-top:8px;"></p>
+            <a href="dashboard.html" class="btn-signin"
+                style="margin-top:20px;display:inline-block;padding:12px 24px;">Back to Dashboard</a>
+        </div>
+
+        <!-- Main content -->
+        <div id="main-content" style="display:none;">
+
+            <!-- ── Request Card ── -->
+            <div class="request-card" id="request-card">
+                <!-- injected by JS -->
+            </div>
+
+            <!-- ── Responses ── -->
+            <div class="section-heading">
+                <span class="material-icons-outlined">forum</span>
+                Responses
+                <span class="response-count-badge" id="resp-count">0</span>
+            </div>
+            <div class="response-list" id="response-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/api';
+        const MEDIA_URL = 'http://127.0.0.1:5000';
+
+        function timeAgo(d) {
+            if (!d) return '';
+            const s = Math.floor((Date.now() - new Date(d)) / 1000);
+            if (s < 60) return 'just now';
+            if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+            if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+            if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
+            return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        function fmtDate(d) {
+            if (!d) return '—';
+            return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        function avatarHTML(user, size = 40) {
+            if (!user) return `<div class="resp-avatar" style="width:${size}px;height:${size}px;">?</div>`;
+            const initial = (user.name || '?').charAt(0).toUpperCase();
+            if (user.avatar) {
+                const avatarSrc = user.avatar.startsWith('http') ? user.avatar : `${MEDIA_URL}${user.avatar}`;
+                return `<div class="resp-avatar" style="width:${size}px;height:${size}px;"><img src="${avatarSrc}" alt="${user.name}" onerror="this.outerHTML='${(user.name || '?').charAt(0).toUpperCase()}'"></div>`;
+            }
+            return `<div class="resp-avatar" style="width:${size}px;height:${size}px;">${initial}</div>`;
+        }
+
+        function showError(title = 'Error', desc = '') {
+            document.getElementById('state-loading').style.display = 'none';
+            document.getElementById('state-error').style.display = 'block';
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-desc').textContent = desc;
+        }
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const requestId = params.get('id');
+
+            if (!requestId) {
+                showError('No request ID', 'Navigate here from your Dashboard → My Requests.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/community/${requestId}`);
+                const data = await res.json();
+
+                if (!data.success || !data.request) {
+                    showError('Request not found', 'This request may have been deleted.');
+                    return;
+                }
+
+                renderRequest(data.request);
+                renderResponses(data.request.responses || []);
+
+                document.getElementById('state-loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+
+            } catch (err) {
+                showError('Connection error', 'Could not reach the server. Make sure the backend is running.');
+            }
+        }
+
+        function renderRequest(r) {
+            const card = document.getElementById('request-card');
+            const me = JSON.parse(localStorage.getItem('user') || 'null');
+            const isOwner = me && r.requester && me._id === r.requester._id;
+
+            // Status badge
+            let statusBadge = `<span class="status-badge ${r.status}">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>`;
+            if (r.isUrgent) statusBadge = `<span class="status-badge urgent"><span class="material-icons-outlined" style="font-size:14px;">priority_high</span>Urgent</span>` + statusBadge;
+
+            // Requester avatar
+            const reqAvatar = avatarHTML(r.requester, 44);
+            const reqVerified = r.requester?.isVerified
+                ? `<span class="verified-chip"><span class="material-icons-outlined" style="font-size:11px;">verified</span> Verified</span>` : '';
+
+            card.innerHTML = `
+                <div class="request-header">
+                    <h1 class="request-title">${r.itemName}</h1>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">${statusBadge}</div>
+                </div>
+
+                <div class="request-meta">
+                    <div class="request-meta-item">
+                        <span class="material-icons-outlined">payments</span>
+                        Budget: <strong>₹${r.budget}/day</strong>
+                    </div>
+                    <div class="request-meta-item">
+                        <span class="material-icons-outlined">location_on</span>
+                        <strong>${r.location}</strong>
+                    </div>
+                    <div class="request-meta-item">
+                        <span class="material-icons-outlined">category</span>
+                        <strong>${r.category}</strong>
+                    </div>
+                    <div class="request-meta-item">
+                        <span class="material-icons-outlined">event</span>
+                        <strong>${fmtDate(r.fromDate)}</strong>
+                        ${r.toDate ? `→ <strong>${fmtDate(r.toDate)}</strong>` : ''}
+                    </div>
+                    <div class="request-meta-item">
+                        <span class="material-icons-outlined">schedule</span>
+                        Posted ${timeAgo(r.createdAt)}
+                    </div>
+                </div>
+
+                ${r.description ? `<div class="request-description">${r.description}</div>` : ''}
+
+                <div class="requester-row">
+                    ${reqAvatar}
+                    <div>
+                        <div class="req-name">
+                            ${r.requester?.name || 'Unknown'}
+                            ${reqVerified}
+                        </div>
+                        <div class="req-since">${r.requester?.location || 'Location not set'}</div>
+                    </div>
+                </div>
+
+                ${isOwner ? `
+                <div class="danger-zone">
+                    <div>
+                        <strong>Delete this request</strong>
+                        <p>This will permanently remove your request and all its responses.</p>
+                    </div>
+                    <button class="btn-delete" id="btn-delete-request" onclick="deleteRequest('${r._id}')">
+                        <span class="material-icons-outlined">delete</span>
+                        Delete Request
+                    </button>
+                </div>` : ''}
+            `;
+        }
+
+        function renderResponses(responses) {
+            const list = document.getElementById('response-list');
+            document.getElementById('resp-count').textContent = responses.length;
+
+            if (responses.length === 0) {
+                list.innerHTML = `
+                    <div class="no-responses">
+                        <span class="material-icons-outlined">forum</span>
+                        <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;">No responses yet</p>
+                        <p style="font-size:14px;">Others can respond to this request from the Community page.</p>
+                    </div>`;
+                return;
+            }
+
+            const me = JSON.parse(localStorage.getItem('user') || 'null');
+            const requestId = new URLSearchParams(window.location.search).get('id');
+
+            list.innerHTML = '';
+            responses.forEach(resp => {
+                const responderAvatar = avatarHTML(resp.responder, 40);
+                const verifiedBadge = resp.responder?.isVerified
+                    ? `<span class="verified-chip"><span class="material-icons-outlined" style="font-size:11px;">verified</span> Verified</span>` : '';
+
+                // Show Chat button only if the logged-in user is the requester (or any logged-in user can chat with the responder)
+                const canChat = me && resp.responder && me._id !== resp.responder._id;
+                const chatBtn = canChat ? `
+                    <button onclick="chatWithResponder('${resp.responder._id}', '${requestId}')" style="
+                        margin-top:12px; padding:8px 16px;
+                        border:1.5px solid var(--primary); border-radius:10px;
+                        background:#EFF6FF; color:var(--primary);
+                        font-size:13px; font-weight:700; font-family:'Inter',sans-serif;
+                        cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+                        transition:all 0.2s;
+                    " onmouseover="this.style.background='var(--primary)';this.style.color='#fff'"
+                       onmouseout="this.style.background='#EFF6FF';this.style.color='var(--primary)'">
+                        <span class="material-icons-outlined" style="font-size:16px;">chat</span>
+                        Chat with ${resp.responder?.name?.split(' ')[0] || 'them'}
+                    </button>` : '';
+
+                const card = document.createElement('div');
+                card.className = 'response-card';
+                card.innerHTML = `
+                    <div class="response-header">
+                        ${responderAvatar}
+                        <div>
+                            <div class="resp-name">
+                                ${resp.responder?.name || 'Unknown user'}
+                                ${verifiedBadge}
+                            </div>
+                            <div class="resp-time">${timeAgo(resp.createdAt)}</div>
+                        </div>
+                    </div>
+                    <div class="resp-message">${resp.message || ''}</div>
+                    ${chatBtn}
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function chatWithResponder(responderId, requestId) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = `login?redirect=${encodeURIComponent(window.location.href)}`;
+                return;
+            }
+            window.location.href = `chat?with=${responderId}&request=${requestId}`;
+        }
+
+        async function deleteRequest(id) {
+            if (!confirm('Are you sure you want to delete this request? This cannot be undone.')) return;
+            const btn = document.getElementById('btn-delete-request');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-icons-outlined" style="animation:spin 1s linear infinite;">sync</span> Deleting…';
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/community/${id}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+                // Redirect back to dashboard after delete
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alert(err.message || 'Failed to delete. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-icons-outlined">delete</span> Delete Request';
+            }
+        }
+
+        init();
+    </script>
+
+    <style>
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</body>
+
+</html>

@@ -12,6 +12,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Tom Select (city picker) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <!-- Cropper.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <style>
         /* ===================================================
@@ -588,6 +595,26 @@
         </div>
     </div>
 
+    <!-- Image Crop Modal -->
+    <div class="modal-backdrop" id="crop-modal">
+        <div class="modal" style="max-width: 500px; padding: 24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;">Crop Profile Picture</h3>
+                <span class="material-icons-outlined" style="cursor:pointer;color:var(--text-muted);"
+                    onclick="closeCropModal()">close</span>
+            </div>
+            <div
+                style="width: 100%; max-height: 400px; overflow: hidden; border-radius: 8px; background: #F8FAFC; margin-bottom: 20px;">
+                <img id="crop-image" src="" style="max-width: 100%; display: block;">
+            </div>
+            <div class="modal-actions" style="margin-top:0;">
+                <button class="btn-modal-cancel" onclick="closeCropModal()">Cancel</button>
+                <button class="btn-modal-confirm" style="background:var(--primary);" id="btn-confirm-crop"
+                    onclick="confirmCrop()">Crop Image</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast">
         <span class="material-icons-outlined" id="toast-icon">check_circle</span>
@@ -602,7 +629,7 @@
         <div
             style="max-width:760px;margin:0 auto;height:56px;display:flex;align-items:center;justify-content:space-between;">
             <a href="index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
-                <img src="./images/logo.png" style="height:32px;" alt="OurStuff">
+                <img src="./images/logo-white.png" style="height:32px;" alt="OurStuff">
             </a>
             <span style="font-size:13px;color:var(--text-muted);">My Profile</span>
         </div>
@@ -674,7 +701,7 @@
                 </div>
                 <div class="field-wrap">
                     <label>Location</label>
-                    <input type="text" id="field-location" placeholder="City, State">
+                    <select id="field-location" placeholder="Search your city…"></select>
                 </div>
             </div>
 
@@ -703,6 +730,84 @@
                 <label>Identity Verification</label>
                 <div id="verify-status-block" style="margin-top:4px;"></div>
             </div>
+        </div>
+
+        <!-- Change Password card -->
+        <div class="profile-card" id="change-password-card">
+            <div class="profile-card-title">
+                <span class="material-icons-outlined">lock</span>
+                Change Password
+            </div>
+
+            <!-- Old Password -->
+            <div class="field-wrap">
+                <label>Current Password</label>
+                <div style="position:relative;">
+                    <input type="password" id="old-password" placeholder="Enter your current password"
+                        autocomplete="current-password">
+                    <button type="button" onclick="togglePw('old-password', this)" tabindex="-1"
+                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted);">
+                        <span class="material-icons-outlined" style="font-size:18px;">visibility</span>
+                    </button>
+                </div>
+                <div style="margin-top:6px;">
+                    <a href="login.html?mode=forgot"
+                        style="font-size:12px;font-weight:600;color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                        <span class="material-icons-outlined" style="font-size:14px;">help_outline</span>
+                        Forgot password?
+                    </a>
+                </div>
+            </div>
+
+            <!-- New Password -->
+            <div class="field-wrap">
+                <label>New Password</label>
+                <div style="position:relative;">
+                    <input type="password" id="new-password" placeholder="At least 6 characters"
+                        autocomplete="new-password" oninput="checkStrength(this.value)">
+                    <button type="button" onclick="togglePw('new-password', this)" tabindex="-1"
+                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted);">
+                        <span class="material-icons-outlined" style="font-size:18px;">visibility</span>
+                    </button>
+                </div>
+                <!-- Strength bar -->
+                <div style="margin-top:8px;display:flex;gap:4px;align-items:center;" id="strength-row"
+                    style="display:none;">
+                    <div style="flex:1;height:4px;border-radius:4px;background:var(--border);overflow:hidden;">
+                        <div id="strength-bar"
+                            style="height:100%;width:0%;transition:width 0.3s,background 0.3s;border-radius:4px;"></div>
+                    </div>
+                    <span id="strength-label"
+                        style="font-size:11px;font-weight:700;color:var(--text-muted);white-space:nowrap;min-width:44px;text-align:right;"></span>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="field-wrap">
+                <label>Confirm New Password</label>
+                <div style="position:relative;">
+                    <input type="password" id="confirm-password" placeholder="Re-enter new password"
+                        autocomplete="new-password">
+                    <button type="button" onclick="togglePw('confirm-password', this)" tabindex="-1"
+                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted);">
+                        <span class="material-icons-outlined" style="font-size:18px;">visibility</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error / Success Inline -->
+            <div id="pw-msg"
+                style="display:none;font-size:13px;font-weight:600;padding:10px 14px;border-radius:10px;margin-bottom:14px;">
+            </div>
+
+            <button class="btn-save" id="btn-change-pw" onclick="submitChangePassword()">
+                <div class="btn-spinner"></div>
+                <span class="btn-label">
+                    <span class="material-icons-outlined"
+                        style="font-size:16px;vertical-align:middle;">lock_reset</span>
+                    Update Password
+                </span>
+            </button>
         </div>
 
         <!-- Danger zone -->
@@ -763,7 +868,8 @@
             // Avatar
             const avatarEl = document.getElementById('profile-avatar');
             if (user.avatar) {
-                avatarEl.innerHTML = `<img src="${API.replace('/api', '')}${user.avatar}" alt="${user.name}">`;
+                const avatarSrc = user.avatar.startsWith('http') ? user.avatar : `${API.replace('/api', '')}${user.avatar}`;
+                avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${user.name}" onerror="this.outerHTML='<span id=\\'avatar-initial\\'>${user.name ? user.name.charAt(0).toUpperCase() : '?'}</span>';">`;
             } else {
                 document.getElementById('avatar-initial').textContent =
                     user.name ? user.name.charAt(0).toUpperCase() : '?';
@@ -807,7 +913,15 @@
             document.getElementById('field-name').value = user.name || '';
             document.getElementById('field-email').value = user.email || '';
             document.getElementById('field-phone').value = user.phone || '';
-            document.getElementById('field-location').value = user.location || '';
+            // Location field — prefill TomSelect
+            const locVal = user.location || '';
+            if (locVal && window._profileLocSelect) {
+                // Add existing location as an option and select it
+                window._profileLocSelect.addOption({ name: locVal, display: locVal });
+                window._profileLocSelect.setValue(locVal, true);
+            } else {
+                window._profileLocName = locVal;
+            }
             document.getElementById('field-bio').value = user.bio || '';
 
             // Also update localStorage so navbar is fresh
@@ -817,6 +931,9 @@
         loadProfile();
 
         // ─── Save profile ──────────────────────────────────────────────
+        let activeCropper = null;
+        let croppedAvatarBlob = null;
+
         document.getElementById('btn-save').addEventListener('click', async () => {
             const btn = document.getElementById('btn-save');
             btn.disabled = true;
@@ -825,11 +942,12 @@
             const body = new FormData();
             body.append('name', document.getElementById('field-name').value.trim());
             body.append('phone', document.getElementById('field-phone').value.trim());
-            body.append('location', document.getElementById('field-location').value.trim());
+            body.append('location', window._profileLocName || document.getElementById('field-location').value.trim());
             body.append('bio', document.getElementById('field-bio').value.trim());
 
-            const avatarFile = document.getElementById('avatar-file-input').files[0];
-            if (avatarFile) body.append('avatar', avatarFile);
+            if (croppedAvatarBlob) {
+                body.append('avatar', croppedAvatarBlob, 'avatar.png');
+            }
 
             try {
                 const res = await fetch(`${API}/users/profile`, {
@@ -839,6 +957,8 @@
                 });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message || 'Failed to save');
+
+                croppedAvatarBlob = null; // Clear out blob after save successful
 
                 renderProfile(data.user);
                 showToast('Profile updated successfully!', 'success');
@@ -860,14 +980,63 @@
         document.getElementById('avatar-file-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = (ev) => {
-                document.getElementById('profile-avatar').innerHTML =
-                    `<img src="${ev.target.result}" alt="Preview" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                const imageEl = document.getElementById('crop-image');
+                imageEl.src = ev.target.result;
+
+                document.getElementById('crop-modal').classList.add('show');
+
+                if (activeCropper) {
+                    activeCropper.destroy();
+                }
+
+                activeCropper = new Cropper(imageEl, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    restore: false,
+                    guides: false,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
             };
             reader.readAsDataURL(file);
-            showToast('Photo selected. Click "Save Changes" to apply.', 'success');
+            e.target.value = ''; // Reset input to allow selecting same file again
         });
+
+        function closeCropModal() {
+            document.getElementById('crop-modal').classList.remove('show');
+            if (activeCropper) {
+                activeCropper.destroy();
+                activeCropper = null;
+            }
+        }
+
+        function confirmCrop() {
+            if (!activeCropper) return;
+            const canvas = activeCropper.getCroppedCanvas({
+                width: 400,
+                height: 400
+            });
+
+            // Get blob from canvas
+            canvas.toBlob((blob) => {
+                croppedAvatarBlob = blob;
+                // Preview it
+                const previewUrl = URL.createObjectURL(blob);
+                document.getElementById('profile-avatar').innerHTML =
+                    `<img src="${previewUrl}" alt="Preview" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+
+                closeCropModal();
+                showToast('Photo cropped. Click "Save Changes" to upload.', 'success');
+            }, 'image/png');
+        }
 
         // ─── Logout modal ──────────────────────────────────────────────
         function openLogoutModal() {
@@ -895,6 +1064,141 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = 'index.html';
+        });
+
+        // ─── Change Password ───────────────────────────────────────────
+        function togglePw(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('.material-icons-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        function checkStrength(pw) {
+            const bar = document.getElementById('strength-bar');
+            const label = document.getElementById('strength-label');
+            const row = document.getElementById('strength-row');
+
+            if (!pw) { bar.style.width = '0%'; label.textContent = ''; row.style.display = 'none'; return; }
+            row.style.display = 'flex';
+
+            let score = 0;
+            if (pw.length >= 6) score++;
+            if (pw.length >= 10) score++;
+            if (/[A-Z]/.test(pw)) score++;
+            if (/[0-9]/.test(pw)) score++;
+            if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+            const levels = [
+                { pct: '20%', color: '#EF4444', text: 'Weak' },
+                { pct: '40%', color: '#F97316', text: 'Fair' },
+                { pct: '60%', color: '#EAB308', text: 'Good' },
+                { pct: '80%', color: '#22C55E', text: 'Strong' },
+                { pct: '100%', color: '#10B981', text: 'Great!' },
+            ];
+            const lvl = levels[Math.min(score - 1, 4)];
+            bar.style.width = lvl.pct;
+            bar.style.background = lvl.color;
+            label.style.color = lvl.color;
+            label.textContent = lvl.text;
+        }
+
+        function showPwMsg(msg, type = 'error') {
+            const el = document.getElementById('pw-msg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            if (type === 'success') {
+                el.style.background = '#ECFDF5';
+                el.style.color = '#059669';
+                el.style.border = '1px solid #A7F3D0';
+            } else {
+                el.style.background = '#FEF2F2';
+                el.style.color = '#DC2626';
+                el.style.border = '1px solid #FECACA';
+            }
+        }
+
+        async function submitChangePassword() {
+            const oldPw = document.getElementById('old-password').value.trim();
+            const newPw = document.getElementById('new-password').value;
+            const confPw = document.getElementById('confirm-password').value;
+            const btn = document.getElementById('btn-change-pw');
+            const msgEl = document.getElementById('pw-msg');
+            msgEl.style.display = 'none';
+
+            if (!oldPw) { showPwMsg('Please enter your current password.'); return; }
+            if (newPw.length < 6) { showPwMsg('New password must be at least 6 characters.'); return; }
+            if (newPw !== confPw) { showPwMsg('Passwords do not match.'); return; }
+            if (oldPw === newPw) { showPwMsg('New password must be different from current password.'); return; }
+
+            btn.disabled = true;
+            btn.classList.add('loading');
+
+            try {
+                const res = await fetch(`${API}/auth/change-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ oldPassword: oldPw, newPassword: newPw }),
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                // Clear fields
+                document.getElementById('old-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+                checkStrength(''); // reset bar
+
+                showPwMsg('✓ Password changed successfully!', 'success');
+                showToast('Password updated!', 'success');
+            } catch (err) {
+                showPwMsg(err.message || 'Something went wrong. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        }
+    </script>
+    <script>
+        // ── Profile location TomSelect ─────────────────────────────────
+        window._profileLocName = '';
+        window._profileLocSelect = new TomSelect('#field-location', {
+            valueField: 'name',
+            labelField: 'display',
+            searchField: 'display',
+            placeholder: 'Search your city…',
+            create: true, // allow typing a custom location if not found
+            createOnBlur: true,
+            load: function (query, callback) {
+                if (!query.length) return callback();
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&featuretype=city&addressdetails=1&limit=5`;
+                fetch(url)
+                    .then(r => r.json())
+                    .then(json => {
+                        const res = json.map(item => {
+                            const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
+                            return { name: city, display: `${city}, ${item.address.country}` };
+                        });
+                        const unique = Array.from(new Set(res.map(a => a.name))).map(n => res.find(a => a.name === n));
+                        callback(unique);
+                    }).catch(() => callback());
+            },
+            onChange: function (value) {
+                window._profileLocName = value || '';
+            },
+            render: {
+                option: (item, escape) => `<div><div style="font-weight:600">${escape(item.name)}</div><div style="font-size:12px;color:#64748b">${escape(item.display || item.name)}</div></div>`,
+                item: (item, escape) => `<div>${escape(item.name)}</div>`,
+                no_results: () => `<div style="padding:8px 12px;color:#64748b;">No cities found — type your city name</div>`,
+            }
         });
     </script>
 

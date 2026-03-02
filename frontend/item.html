@@ -436,12 +436,14 @@
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <a href="index.html" class="navbar-logo">
-            <img src="./images/logo.png" alt="OurStuff Logo">
+            <img src="./images/logo-white.png" alt="OurStuff Logo">
         </a>
         <ul class="navbar-links">
             <li><a href="browse.html">Browse Items</a></li>
             <li><a href="community.html">Community</a></li>
             <li><a href="list-item.html">List an Item</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="index.html#help">Help</a></li>
         </ul>
         <div class="navbar-actions">
             <button class="btn-signin" id="btn-signin">Sign in / Login</button>
@@ -483,7 +485,7 @@
                         </div>
                         <div class="item-meta-item">
                             <span class="material-icons-outlined">calendar_today</span>
-                            <span>Listed 2 days ago</span>
+                            <span id="detail-listed">Loading…</span>
                         </div>
                         <div class="item-meta-item" id="verified-badge" style="display:none; color:var(--secondary);">
                             <span class="material-icons-outlined">verified</span>
@@ -502,7 +504,20 @@
                         <li>Communicate clearly with the owner regarding pick-up.</li>
                         <li>Report any issues within 2 hours of pick-up.</li>
                     </ul>
+
+                    <div class="divider"></div>
+
+                    <!-- Reviews section -->
+                    <span class="section-label">Reviews</span>
+                    <div id="reviews-area">
+                        <div
+                            style="color:var(--text-muted);font-size:14px;padding:8px 0;display:flex;align-items:center;gap:8px;">
+                            <span class="material-icons-outlined" style="animation:spin 1s linear infinite;">sync</span>
+                            Loading reviews&hellip;
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -538,9 +553,14 @@
                         </div>
                     </div>
 
+                    <!-- Rent error/success message -->
+                    <div id="rent-msg"
+                        style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:4px;">
+                    </div>
+
                     <button class="btn-rent" id="btn-rent">
                         <span class="material-icons-outlined">electric_bolt</span>
-                        Rent Now
+                        <span id="btn-rent-text">Rent Now</span>
                     </button>
                 </div>
             </div>
@@ -551,23 +571,38 @@
                 </div>
                 <div class="owner-info">
                     <h4 id="owner-name"></h4>
-                    <p id="owner-since">Member since 2024</p>
+                    <p id="owner-since">Loading…</p>
                     <div class="owner-rating">
                         <span class="material-icons-outlined" style="font-size: 14px;">star</span>
-                        <span id="owner-stars">4.8</span>
-                        <span style="color: var(--text-muted); font-weight: normal;">(24 reviews)</span>
+                        <span id="owner-stars">—</span>
+                        <span id="owner-review-count" style="color: var(--text-muted); font-weight: normal;"></span>
                     </div>
                 </div>
             </a>
+
+            <!-- Chat with Owner -->
+            <button id="btn-chat-owner" onclick="chatWithOwner()" style="
+                width:100%; padding:13px; margin-top:-8px;
+                border:1.5px solid var(--primary); border-radius:14px;
+                background:#EFF6FF; color:var(--primary);
+                font-size:14px; font-weight:700; font-family:'Inter',sans-serif;
+                cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+                transition:all 0.2s;
+            " onmouseover="this.style.background='var(--primary)';this.style.color='#fff'"
+                onmouseout="this.style.background='#EFF6FF';this.style.color='var(--primary)'">
+                <span class="material-icons-outlined">chat</span>
+                Chat with Owner
+            </button>
         </div>
     </div>
 
     <!-- Error State -->
-    <div id="item-error" style="display:none; text-align:center; padding: 100px;">
+    <div id="item-error" style="display:none; text-align:center; padding: 80px 24px;">
         <span class="material-icons-outlined" style="font-size: 64px; color: #f87171;">error_outline</span>
-        <h2 style="margin-top: 16px;">Item not found</h2>
-        <p style="color: var(--text-muted); margin-bottom: 24px;">The item you are looking for doesn't exist or was
-            removed.</p>
+        <h2 style="margin-top: 16px;" id="error-title">Item not found</h2>
+        <p style="color: var(--text-muted); margin-bottom: 8px;" id="error-desc">The item doesn't exist or was removed.
+        </p>
+        <p style="color: #94A3B8; font-size:13px; margin-bottom: 24px;" id="error-hint"></p>
         <a href="browse.html" class="btn-signin" style="padding: 12px 24px;">Back to search</a>
     </div>
 
@@ -582,19 +617,21 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5000/api';
-        const MEDIA_URL = 'http://localhost:5000';
+        const API_URL = 'http://127.0.0.1:5000/api';
+        const MEDIA_URL = 'http://127.0.0.1:5000';
 
         let currentItem = null;
         let isZoomed = false;
         let zoomScale = 1;
+        let currentX = 0, currentY = 0;
 
+        // ─── Init ─────────────────────────────────────────────────────
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const itemId = params.get('id');
 
             if (!itemId) {
-                showError();
+                showError('No item ID', 'No item ID was provided in the URL.', 'Make sure you arrived here from the Browse page.');
                 return;
             }
 
@@ -603,19 +640,26 @@
                 const data = await res.json();
 
                 if (!data.success || !data.item) {
-                    showError();
+                    showError('Item not found', 'This item doesn\'t exist or was removed.', '');
                     return;
                 }
 
                 currentItem = data.item;
                 renderItem(data.item);
                 setupBooking();
+                loadReviews(itemId);
             } catch (err) {
                 console.error(err);
-                showError();
+                // Likely a CORS/network error — user opened via file://
+                showError(
+                    'Connection error',
+                    'Could not connect to the server.',
+                    '⚠️ Open this app via http://localhost:3000, not directly from the file system.'
+                );
             }
         }
 
+        // ─── Render item ──────────────────────────────────────────────
         function renderItem(item) {
             document.getElementById('loading-details').style.display = 'none';
             document.getElementById('item-content').style.display = 'block';
@@ -628,169 +672,220 @@
             const thumbRow = document.getElementById('thumb-row');
 
             if (item.images && item.images.length > 0) {
-                mainImg.innerHTML = `<img src="${MEDIA_URL}${item.images[0]}" id="active-main-img">`;
+                const getSrc = (img) => img.startsWith('http') ? img : MEDIA_URL + img;
+                mainImg.innerHTML = `<img src="${getSrc(item.images[0])}" id="active-main-img" style="cursor:zoom-in;">`;
                 thumbRow.innerHTML = item.images.map((img, i) => `
-                    <div class="thumb ${i === 0 ? 'active' : ''}" onclick="setMainImage('${MEDIA_URL}${img}', this)">
-                        <img src="${MEDIA_URL}${img}">
-                    </div>
-                `).join('');
+                    <div class="thumb ${i === 0 ? 'active' : ''}" onclick="setMainImage('${getSrc(img)}', this)">
+                        <img src="${getSrc(img)}">
+                    </div>`).join('');
             } else {
-                mainImg.innerHTML = `
-                    <div class="main-image-placeholder">
-                        <span class="material-icons-outlined">inventory_2</span>
-                    </div>`;
+                mainImg.innerHTML = `<div class="main-image-placeholder"><span class="material-icons-outlined">inventory_2</span></div>`;
                 thumbRow.style.display = 'none';
             }
 
-            // Info
+            // Category + title
             document.getElementById('detail-category').textContent = item.category;
             document.getElementById('detail-title').textContent = item.title;
             document.getElementById('detail-location').textContent = item.location;
             document.getElementById('detail-desc').textContent = item.description;
 
-            // Price & Owner
+            // Listed X days ago
+            if (item.createdAt) {
+                const days = Math.max(0, Math.floor((Date.now() - new Date(item.createdAt)) / 86400000));
+                document.getElementById('detail-listed').textContent =
+                    days === 0 ? 'Listed today' : `Listed ${days} day${days > 1 ? 's' : ''} ago`;
+            }
+
+            // Price
             document.getElementById('side-price').textContent = `₹${item.pricePerDay}`;
 
+            // Owner card
             if (item.owner) {
                 document.getElementById('owner-name').textContent = item.owner.name;
                 const avatarEl = document.getElementById('owner-avatar');
                 if (item.owner.avatar) {
-                    avatarEl.innerHTML = `<img src="${MEDIA_URL}${item.owner.avatar}">`;
+                    const avatarSrc = item.owner.avatar.startsWith('http') ? item.owner.avatar : MEDIA_URL + item.owner.avatar;
+                    avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${item.owner.name}">`;
                 } else {
-                    const initials = item.owner.name.charAt(0).toUpperCase();
-                    avatarEl.innerHTML = `<span style="font-size:20px; font-weight:800; color:var(--primary);">${initials}</span>`;
+                    avatarEl.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--primary);">${item.owner.name.charAt(0).toUpperCase()}</span>`;
                 }
-                document.getElementById('owner-stars').textContent = item.owner.rating || '5.0';
 
-                // Show verified badge if owner is verified
+                const rating = item.owner.rating || 0;
+                const reviewCount = item.owner.reviewCount || 0;
+                document.getElementById('owner-stars').textContent = rating > 0 ? rating.toFixed(1) : 'New';
+                document.getElementById('owner-review-count').textContent = reviewCount > 0 ? `(${reviewCount} review${reviewCount > 1 ? 's' : ''})` : '';
+
                 if (item.owner.isVerified) {
                     document.getElementById('verified-badge').style.display = 'flex';
                 }
 
-                // Member since formatting
-                const joinedDate = new Date(item.owner.createdAt);
-                const month = joinedDate.toLocaleString('default', { month: 'long' });
-                const year = joinedDate.getFullYear();
-                document.getElementById('owner-since').textContent = `Member since ${month} ${year}`;
+                if (item.owner.createdAt) {
+                    const d = new Date(item.owner.createdAt);
+                    document.getElementById('owner-since').textContent =
+                        `Member since ${d.toLocaleString('default', { month: 'long' })} ${d.getFullYear()}`;
+                }
+
+                // Don't let the user rent their own item
+                const me = JSON.parse(localStorage.getItem('user') || 'null');
+                if (me && me._id === item.owner._id) {
+                    document.getElementById('btn-rent').disabled = true;
+                    document.getElementById('btn-rent').style.opacity = '0.5';
+                    document.getElementById('btn-rent-text').textContent = 'Your Listing';
+                }
             }
         }
 
+        // ─── Thumbnail switch ──────────────────────────────────────────
         function setMainImage(src, thumbEl) {
             document.getElementById('active-main-img').src = src;
             document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
             thumbEl.classList.add('active');
         }
 
-        // ─── Lightbox Logic ───────────────────────────────────────────
+        // ─── Reviews ──────────────────────────────────────────────────
+        async function loadReviews(itemId) {
+            const area = document.getElementById('reviews-area');
+            try {
+                const res = await fetch(`${API_URL}/reviews/item/${itemId}`);
+                const data = await res.json();
+                if (!data.success || !data.reviews || data.reviews.length === 0) {
+                    area.innerHTML = `<p style="color:var(--text-muted);font-size:14px;">No reviews yet for this item.</p>`;
+                    return;
+                }
+                area.innerHTML = data.reviews.map(r => `
+                    <div style="padding:14px 0;border-bottom:1px solid var(--border);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:14px;">
+                                ${r.reviewer?.name?.charAt(0)?.toUpperCase() || '?'}
+                            </div>
+                            <div>
+                                <div style="font-size:13px;font-weight:700;color:var(--text);">${r.reviewer?.name || 'User'}</div>
+                                <div style="font-size:11px;color:var(--text-muted);">${new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                            </div>
+                            <div style="margin-left:auto;display:flex;gap:2px;">
+                                ${Array.from({ length: 5 }, (_, i) => `<span class="material-icons-outlined" style="font-size:14px;color:${i < r.rating ? '#F59E0B' : '#CBD5E1'}">star</span>`).join('')}
+                            </div>
+                        </div>
+                        <p style="font-size:14px;color:#475569;margin:0;line-height:1.5;">${r.comment || ''}</p>
+                    </div>`).join('');
+            } catch (_) {
+                area.innerHTML = `<p style="color:var(--text-muted);font-size:14px;">Could not load reviews.</p>`;
+            }
+        }
+
+        // ─── Lightbox ─────────────────────────────────────────────────
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
 
-        document.getElementById('main-img-container').addEventListener('click', (e) => {
-            if (e.target.tagName === 'IMG') {
-                openLightbox(e.target.src);
-            }
+        document.getElementById('main-img-container').addEventListener('click', e => {
+            if (e.target.tagName === 'IMG') openLightbox(e.target.src);
         });
 
         function openLightbox(src) {
             lightboxImg.src = src;
             lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scroll
+            document.body.style.overflow = 'hidden';
             resetZoom();
         }
-
         function closeLightbox() {
             lightbox.classList.remove('active');
             document.body.style.overflow = '';
             resetZoom();
         }
-
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) closeLightbox();
-        });
-
-        // Zoom & Pan
-        lightboxImg.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleZoom();
-        });
+        lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+        lightboxImg.addEventListener('click', e => { e.stopPropagation(); toggleZoom(); });
 
         function toggleZoom() {
             isZoomed = !isZoomed;
-            if (isZoomed) {
-                zoomScale = 2;
-                lightboxImg.classList.add('zoomed');
-                lightboxImg.style.transform = `scale(${zoomScale})`;
-            } else {
-                resetZoom();
-            }
+            zoomScale = isZoomed ? 2 : 1;
+            lightboxImg.style.transform = `scale(${zoomScale})`;
+            lightboxImg.classList.toggle('zoomed', isZoomed);
         }
-
         function resetZoom() {
-            isZoomed = false;
-            zoomScale = 1;
+            isZoomed = false; zoomScale = 1; currentX = 0; currentY = 0;
             lightboxImg.classList.remove('zoomed');
             lightboxImg.style.transform = 'scale(1)';
-            lightboxImg.style.left = '0';
-            lightboxImg.style.top = '0';
         }
 
-        // Mousewheel Zoom
-        lightbox.addEventListener('wheel', (e) => {
+        lightbox.addEventListener('wheel', e => {
             if (!lightbox.classList.contains('active')) return;
             e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.2 : 0.2;
-            zoomScale = Math.min(Math.max(1, zoomScale + delta), 4);
+            zoomScale = Math.min(Math.max(1, zoomScale + (e.deltaY > 0 ? -0.2 : 0.2)), 4);
             lightboxImg.style.transform = `scale(${zoomScale})`;
             isZoomed = zoomScale > 1;
-            if (isZoomed) lightboxImg.classList.add('zoomed');
-            else lightboxImg.classList.remove('zoomed');
+            lightboxImg.classList.toggle('zoomed', isZoomed);
         }, { passive: false });
 
-        // Drag to Pan
-        let isDragging = false;
-        let startX, startY;
-        let currentX = 0, currentY = 0;
-
-        lightboxImg.addEventListener('mousedown', (e) => {
+        let isDragging = false, startX, startY;
+        lightboxImg.addEventListener('mousedown', e => {
             if (!isZoomed) return;
-            isDragging = true;
-            startX = e.clientX - currentX;
-            startY = e.clientY - currentY;
+            isDragging = true; startX = e.clientX - currentX; startY = e.clientY - currentY;
             lightboxImg.style.cursor = 'grabbing';
         });
-
-        window.addEventListener('mousemove', (e) => {
+        window.addEventListener('mousemove', e => {
             if (!isDragging) return;
-            currentX = e.clientX - startX;
-            currentY = e.clientY - startY;
+            currentX = e.clientX - startX; currentY = e.clientY - startY;
             lightboxImg.style.transition = 'none';
-            lightboxImg.style.transform = `scale(${zoomScale}) translate(${currentX / zoomScale}px, ${currentY / zoomScale}px)`;
+            lightboxImg.style.transform = `scale(${zoomScale}) translate(${currentX / zoomScale}px,${currentY / zoomScale}px)`;
         });
-
         window.addEventListener('mouseup', () => {
             isDragging = false;
             lightboxImg.style.cursor = isZoomed ? 'zoom-out' : 'zoom-in';
-            lightboxImg.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            lightboxImg.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
         });
 
-        function showError() {
+        // ─── Error state ──────────────────────────────────────────────
+        function showError(title = 'Item not found', desc = 'This item doesn\'t exist or was removed.', hint = '') {
             document.getElementById('loading-details').style.display = 'none';
+            document.getElementById('detail-container').style.display = 'none';
             document.getElementById('item-error').style.display = 'block';
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-desc').textContent = desc;
+            document.getElementById('error-hint').textContent = hint;
         }
 
+        // ─── Booking / Rent Now ───────────────────────────────────────
         function setupBooking() {
             const startInput = document.getElementById('start-date');
             const endInput = document.getElementById('end-date');
             const summary = document.getElementById('booking-summary');
             const btnRent = document.getElementById('btn-rent');
+            const rentMsg = document.getElementById('rent-msg');
 
-            // Set min dates to today
             const today = new Date().toISOString().split('T')[0];
             startInput.min = today;
             endInput.min = today;
+            startInput.value = '';
+            endInput.value = '';
+
+            // Block already-booked dates visually (disable booking if overlap)
+            const bookedRanges = (currentItem.bookedDates || []).map(b => ({
+                from: new Date(b.from), to: new Date(b.to)
+            }));
+
+            function isDateBooked(dateStr) {
+                const d = new Date(dateStr);
+                return bookedRanges.some(r => d >= r.from && d <= r.to);
+            }
+
+            function isPastDate(dateStr) {
+                return dateStr < today;
+            }
 
             function updatePrice() {
-                if (!startInput.value || !endInput.value) {
+                rentMsg.style.display = 'none';
+                if (!startInput.value || !endInput.value) { summary.style.display = 'none'; return; }
+
+                // Guard: reject past dates even if typed manually
+                if (isPastDate(startInput.value)) {
+                    startInput.value = today;
+                    showRentMsg('Start date cannot be in the past.', 'error');
+                    summary.style.display = 'none';
+                    return;
+                }
+                if (isPastDate(endInput.value)) {
+                    endInput.value = today;
+                    showRentMsg('End date cannot be in the past.', 'error');
                     summary.style.display = 'none';
                     return;
                 }
@@ -798,48 +893,119 @@
                 const start = new Date(startInput.value);
                 const end = new Date(endInput.value);
 
-                // Ensure same-day or future date
-                if (end >= start) {
-                    // Calculation: (end - start) in days. 
-                    // We add 1 because renting from Jan 1 to Jan 1 is considered 1 day.
-                    const diffTime = Math.abs(end - start);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                if (end < start) { summary.style.display = 'none'; return; }
 
-                    const subtotal = diffDays * currentItem.pricePerDay;
-                    const fee = Math.round(subtotal * 0.05); // 5% of total
-                    const total = subtotal + fee;
-
-                    document.getElementById('summary-calc').textContent = `₹${currentItem.pricePerDay} x ${diffDays} day${diffDays > 1 ? 's' : ''}`;
-                    document.getElementById('summary-subtotal').textContent = `₹${subtotal.toLocaleString()}`;
-                    document.getElementById('summary-fee').textContent = `₹${fee.toLocaleString()}`;
-                    document.getElementById('summary-total').textContent = `₹${total.toLocaleString()}`;
-
-                    summary.style.display = 'flex';
-                } else {
+                // Check if any selected date is already booked
+                if (isDateBooked(startInput.value) || isDateBooked(endInput.value)) {
+                    showRentMsg('These dates are already booked. Please choose different dates.', 'error');
                     summary.style.display = 'none';
-                }
-            }
-
-            startInput.addEventListener('change', updatePrice);
-            endInput.addEventListener('change', updatePrice);
-
-            btnRent.addEventListener('click', () => {
-                if (!startInput.value || !endInput.value) {
-                    alert('Please select start and end dates.');
                     return;
                 }
 
-                // Auth Check via main.js global function
-                if (typeof requireVerifiedUser === 'function') {
-                    // This function will redirect if not logged in or not verified
-                    const verified = requireVerifiedUser(window.location.href);
-                    if (verified) {
-                        alert('Booking logic coming soon! You are a verified user.');
-                    }
-                } else {
-                    window.location.href = 'login.html';
+                // Same-day = 1 day; otherwise inclusive count
+                const diffDays = start.getTime() === end.getTime()
+                    ? 1
+                    : Math.ceil((end - start) / 86400000) + 1;
+                const subtotal = diffDays * currentItem.pricePerDay;
+                const fee = Math.round(subtotal * 0.05);
+                const total = subtotal + fee;
+
+                document.getElementById('summary-calc').textContent = `₹${currentItem.pricePerDay} × ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+                document.getElementById('summary-subtotal').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+                document.getElementById('summary-fee').textContent = `₹${fee.toLocaleString('en-IN')}`;
+                document.getElementById('summary-total').textContent = `₹${total.toLocaleString('en-IN')}`;
+                summary.style.display = 'flex';
+            }
+
+            function showRentMsg(msg, type) {
+                rentMsg.style.display = 'block';
+                rentMsg.textContent = msg;
+                rentMsg.style.background = type === 'error' ? '#FEF2F2' : '#F0FDF4';
+                rentMsg.style.color = type === 'error' ? '#DC2626' : '#065F46';
+                rentMsg.style.border = `1px solid ${type === 'error' ? '#FECACA' : '#BBF7D0'}`;
+            }
+
+            startInput.addEventListener('change', () => {
+                // Allow same start-date end-date (1-day rental)
+                endInput.min = startInput.value;
+                updatePrice();
+            });
+            endInput.addEventListener('change', updatePrice);
+
+            btnRent.addEventListener('click', async () => {
+                if (!startInput.value || !endInput.value) {
+                    showRentMsg('Please select both start and end dates.', 'error');
+                    return;
+                }
+                const startD = new Date(startInput.value);
+                const endD = new Date(endInput.value);
+                if (endD < startD) {
+                    showRentMsg('End date must be on or after start date.', 'error');
+                    return;
+                }
+
+                // Auth + verification guard
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    return;
+                }
+                const me = JSON.parse(localStorage.getItem('user') || 'null');
+                if (!me || !me.isVerified) {
+                    window.location.href = `verify-identity.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    return;
+                }
+
+                // Submit rental
+                btnRent.disabled = true;
+                document.getElementById('btn-rent-text').textContent = 'Sending request…';
+                rentMsg.style.display = 'none';
+
+                try {
+                    const res = await fetch(`${API_URL}/rentals`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            itemId: currentItem._id,
+                            fromDate: startInput.value,
+                            toDate: endInput.value,
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (!data.success) throw new Error(data.message);
+
+                    showRentMsg('🎉 Rental request sent! The owner will respond shortly. Check your Dashboard for updates.', 'success');
+                    document.getElementById('btn-rent-text').textContent = 'Request Sent ✓';
+                    startInput.value = '';
+                    endInput.value = '';
+                    summary.style.display = 'none';
+
+                } catch (err) {
+                    showRentMsg(err.message || 'Something went wrong. Please try again.', 'error');
+                    btnRent.disabled = false;
+                    document.getElementById('btn-rent-text').textContent = 'Rent Now';
                 }
             });
+        }
+
+        // ─── Chat with Owner ───────────────────────────────────────────────────
+        function chatWithOwner() {
+            if (!currentItem || !currentItem.owner) return;
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                return;
+            }
+            const me = JSON.parse(localStorage.getItem('user') || 'null');
+            if (me && me._id === currentItem.owner._id) {
+                alert("You can't chat with yourself!");
+                return;
+            }
+            window.location.href = `chat?with=${currentItem.owner._id}&item=${currentItem._id}`;
         }
 
         init();

@@ -6,7 +6,7 @@ const Notification = require('../models/Notification');
 // @access  Public
 const getItems = async (req, res, next) => {
     try {
-        const { search, category, minPrice, maxPrice, location, page = 1, limit = 12 } = req.query;
+        const { search, category, minPrice, maxPrice, location, lat, lng, radius, page = 1, limit = 12 } = req.query;
 
         const query = { isAvailable: true };
 
@@ -14,22 +14,59 @@ const getItems = async (req, res, next) => {
             query.$text = { $search: search };
         }
         if (category) query.category = category;
-        if (location) query.location = new RegExp(location, 'i');
+
+        // When doing a geospatial radius search, skip the text location filter
+        // (the $nearSphere already covers proximity)
+        if (location && !(lat && lng && radius)) {
+            query.location = new RegExp(location, 'i');
+        }
+
         if (minPrice || maxPrice) {
             query.pricePerDay = {};
             if (minPrice) query.pricePerDay.$gte = Number(minPrice);
             if (maxPrice) query.pricePerDay.$lte = Number(maxPrice);
         }
 
+        const isGeoSearch = lat && lng && radius;
+
+        // --- Geospatial radius search ---
+        // Using $nearSphere with proper GeoJSON Point.
+        // $nearSphere does NOT conflict with .sort() the same way $near does,
+        // but still sorts results nearest-first automatically.
+        if (isGeoSearch) {
+            query.geoLocation = {
+                $nearSphere: {
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: [Number(lng), Number(lat)],
+                    },
+                    $maxDistance: Number(radius) * 1000, // km → metres
+                },
+            };
+        }
+
         const skip = (Number(page) - 1) * Number(limit);
-        const [items, total] = await Promise.all([
-            Item.find(query)
-                .populate('owner', 'name avatar isVerified location')
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(Number(limit)),
-            Item.countDocuments(query),
-        ]);
+
+        let mongoQuery = Item.find(query)
+            .populate('owner', 'name avatar isVerified location')
+            .skip(skip)
+            .limit(Number(limit));
+
+        // $nearSphere auto-sorts nearest-first; only add createdAt sort for non-geo queries
+        if (!isGeoSearch) {
+            mongoQuery = mongoQuery.sort({ createdAt: -1 });
+        }
+
+        const items = await mongoQuery.lean();
+
+        // Count without the geo-operator (which can't be used in countDocuments alongside $nearSphere on Atlas)
+        const countQuery = { isAvailable: true };
+        if (query.category) countQuery.category = query.category;
+        if (query.location) countQuery.location = query.location;
+        if (query.pricePerDay) countQuery.pricePerDay = query.pricePerDay;
+        if (query.$text) countQuery.$text = query.$text;
+
+        const total = await Item.countDocuments(countQuery);
 
         res.json({
             success: true,
@@ -39,6 +76,7 @@ const getItems = async (req, res, next) => {
             items,
         });
     } catch (err) {
+        console.error('getItems error:', err.message);
         next(err);
     }
 };
@@ -64,10 +102,10 @@ const getItem = async (req, res, next) => {
 // @access  Private + Verified
 const createItem = async (req, res, next) => {
     try {
-        const { title, description, category, pricePerDay, deposit, location } = req.body;
-        const images = req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [];
+        const { title, description, category, pricePerDay, deposit, location, lat, lng } = req.body;
+        const images = req.files ? req.files.map((f) => f.path) : [];
 
-        const item = await Item.create({
+        const newItemData = {
             owner: req.user._id,
             title,
             description,
@@ -76,7 +114,17 @@ const createItem = async (req, res, next) => {
             deposit: deposit || 0,
             location,
             images,
-        });
+        };
+
+        // Store as proper GeoJSON Point if coordinates are provided
+        if (lat && lng) {
+            newItemData.geoLocation = {
+                type: 'Point',
+                coordinates: [Number(lng), Number(lat)],
+            };
+        }
+
+        const item = await Item.create(newItemData);
 
         // Notify owner of successful listing
         await Notification.create({
@@ -107,8 +155,8 @@ const updateItem = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Not authorized' });
         }
 
-        const { title, description, category, pricePerDay, deposit, location, isAvailable } = req.body;
-        const newImages = req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [];
+        const { title, description, category, pricePerDay, deposit, location, isAvailable, lat, lng } = req.body;
+        const newImages = req.files ? req.files.map((f) => f.path) : [];
 
         item.title = title ?? item.title;
         item.description = description ?? item.description;
@@ -118,6 +166,14 @@ const updateItem = async (req, res, next) => {
         item.location = location ?? item.location;
         item.isAvailable = isAvailable ?? item.isAvailable;
         if (newImages.length > 0) item.images = newImages;
+
+        // Update GeoJSON location if new coordinates are provided
+        if (lat && lng) {
+            item.geoLocation = {
+                type: 'Point',
+                coordinates: [Number(lng), Number(lat)],
+            };
+        }
 
         await item.save();
         res.json({ success: true, item });

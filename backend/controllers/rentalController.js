@@ -18,9 +18,25 @@ const createRental = async (req, res, next) => {
 
         const from = new Date(fromDate);
         const to = new Date(toDate);
-        if (from >= to) return res.status(400).json({ success: false, message: 'Invalid date range' });
+        // Allow same-day (1-day rental); reject only if end is before start
+        if (to < from) return res.status(400).json({ success: false, message: 'End date cannot be before start date' });
 
-        const totalDays = Math.ceil((to - from) / (1000 * 60 * 60 * 24));
+        // Date conflict check
+        const isConflict = item.bookedDates.some(range => {
+            const bookedFrom = new Date(range.from);
+            const bookedTo = new Date(range.to);
+            // Overlap condition: ranges overlap if start <= booked end AND end >= booked start
+            return (from <= bookedTo && to >= bookedFrom);
+        });
+
+        if (isConflict) {
+            return res.status(400).json({ success: false, message: 'Item is already booked during these dates' });
+        }
+
+        // Same-day rental = 1 day; otherwise count inclusive days
+        const totalDays = from.getTime() === to.getTime()
+            ? 1
+            : Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
         const totalPrice = totalDays * item.pricePerDay;
 
         const rental = await Rental.create({
@@ -62,7 +78,7 @@ const getRentals = async (req, res, next) => {
             .populate('item', 'title images pricePerDay location')
             .populate('renter', 'name avatar')
             .populate('owner', 'name avatar')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 }).lean();
 
         res.json({ success: true, rentals });
     } catch (err) {
@@ -118,18 +134,20 @@ const updateRentalStatus = async (req, res, next) => {
             return res.status(403).json({ success: false, message: 'Only the owner can mark as complete' });
         }
 
+        const originalStatus = rental.status;
         rental.status = status;
         await rental.save();
 
         // Block item dates on accept
         if (status === 'accepted') {
+            rental.deliveryOtp = Math.floor(100000 + Math.random() * 900000).toString();
             await Item.findByIdAndUpdate(rental.item._id, {
                 $push: { bookedDates: { from: rental.fromDate, to: rental.toDate } },
             });
             await Notification.create({
                 recipient: rental.renter,
                 type: 'rental_accepted',
-                message: `Your rental request for "${rental.item.title}" was accepted!`,
+                message: `Your rental request for "${rental.item.title}" was accepted! Your delivery OTP is ${rental.deliveryOtp}. Give this to the owner when you receive the item.`,
                 rental: rental._id,
                 item: rental.item._id,
             });
@@ -155,10 +173,139 @@ const updateRentalStatus = async (req, res, next) => {
             });
         }
 
+        if (status === 'cancelled') {
+            if (originalStatus === 'accepted') {
+                await Item.findByIdAndUpdate(rental.item._id, {
+                    $pull: { bookedDates: { from: rental.fromDate, to: rental.toDate } },
+                });
+            }
+            await Notification.create({
+                recipient: rental.owner,
+                type: 'rental_cancelled',
+                message: `${req.user.name} cancelled their rental request for "${rental.item.title}".`,
+                rental: rental._id,
+                item: rental.item._id,
+            });
+        }
+
         res.json({ success: true, rental });
     } catch (err) {
         next(err);
     }
 };
 
-module.exports = { createRental, getRentals, getRental, updateRentalStatus };
+// @desc    Seller confirms delivery via OTP
+// @route   POST /api/rentals/:id/deliver
+// @access  Private
+const deliverRental = async (req, res, next) => {
+    try {
+        const { otp } = req.body;
+        const rental = await Rental.findById(req.params.id).populate('item', 'title');
+
+        if (!rental) return res.status(404).json({ success: false, message: 'Rental not found' });
+        if (rental.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Only the owner can mark as delivered' });
+        }
+        if (rental.status !== 'accepted') {
+            return res.status(400).json({ success: false, message: 'Rental must be accepted first' });
+        }
+        if (rental.deliveryOtp !== otp) {
+            return res.status(400).json({ success: false, message: 'Invalid OTP' });
+        }
+
+        rental.status = 'active';
+        rental.deliveredAt = Date.now();
+        await rental.save();
+
+        await Notification.create({
+            recipient: rental.renter,
+            type: 'rental_active',
+            message: `You have successfully received "${rental.item.title}". The rental is now active.`,
+            rental: rental._id,
+            item: rental.item._id,
+        });
+
+        res.json({ success: true, rental });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Renter initiates return (generates return OTP for seller)
+// @route   POST /api/rentals/:id/request-return
+// @access  Private
+const requestReturn = async (req, res, next) => {
+    try {
+        const rental = await Rental.findById(req.params.id).populate('item', 'title');
+
+        if (!rental) return res.status(404).json({ success: false, message: 'Rental not found' });
+        if (rental.renter.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Only the renter can request a return' });
+        }
+        if (rental.status !== 'active') {
+            return res.status(400).json({ success: false, message: 'Rental must be active to return' });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        rental.returnOtp = otp;
+        await rental.save();
+
+        await Notification.create({
+            recipient: rental.owner,
+            type: 'return_otp',
+            message: `The renter is returning "${rental.item.title}". Your return OTP is: ${otp}. Provide this to the renter to confirm the return.`,
+            rental: rental._id,
+            item: rental.item._id,
+        });
+
+        res.json({ success: true, message: 'Return OTP sent to owner. Please ask them for it.' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Renter confirms return via OTP from seller
+// @route   POST /api/rentals/:id/complete-return
+// @access  Private
+const completeReturn = async (req, res, next) => {
+    try {
+        const { otp } = req.body;
+        const rental = await Rental.findById(req.params.id).populate('item', 'title');
+
+        if (!rental) return res.status(404).json({ success: false, message: 'Rental not found' });
+        if (rental.renter.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Only the renter can complete the return' });
+        }
+        if (rental.status !== 'active') {
+            return res.status(400).json({ success: false, message: 'Rental must be active to return' });
+        }
+        if (!rental.returnOtp || rental.returnOtp !== otp) {
+            return res.status(400).json({ success: false, message: 'Invalid OTP' });
+        }
+
+        rental.status = 'completed';
+        await rental.save();
+
+        await Notification.create({
+            recipient: rental.owner,
+            type: 'rental_completed',
+            message: `Your item "${rental.item.title}" has been successfully returned and the rental is complete. Please leave a review!`,
+            rental: rental._id,
+            item: rental.item._id,
+        });
+
+        await Notification.create({
+            recipient: rental.renter,
+            type: 'rental_completed_renter',
+            message: `You have successfully returned "${rental.item.title}". Please leave a review for the item!`,
+            rental: rental._id,
+            item: rental.item._id,
+        });
+
+        res.json({ success: true, rental });
+    } catch (err) {
+        next(err);
+    }
+};
+
+module.exports = { createRental, getRentals, getRental, updateRentalStatus, deliverRental, requestReturn, completeReturn };

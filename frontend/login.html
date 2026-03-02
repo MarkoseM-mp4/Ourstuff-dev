@@ -14,9 +14,6 @@
     <link rel="stylesheet" href="css/style.css">
 
     <style>
-        /* =============================================
-           LOGIN PAGE STYLES
-           ============================================= */
         .auth-page {
             min-height: 100vh;
             background: linear-gradient(135deg, #EFF6FF 0%, #F0FDFA 100%);
@@ -48,7 +45,6 @@
             }
         }
 
-        /* Card top brand bar */
         .auth-brand {
             background: linear-gradient(135deg, var(--primary) 0%, #1D4ED8 100%);
             padding: 28px 36px 24px;
@@ -66,62 +62,14 @@
             margin-top: 6px;
         }
 
-        /* Card body */
         .auth-body {
             padding: 32px 36px 36px;
         }
 
-        /* Step progress bar */
-        .auth-progress {
-            display: flex;
-            align-items: center;
-            margin-bottom: 28px;
-            gap: 0;
-        }
-
-        .auth-step-dot {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #E2E8F0;
-            color: #94A3B8;
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .auth-step-dot.active {
-            background: var(--primary);
-            color: #fff;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-        }
-
-        .auth-step-dot.done {
-            background: #10B981;
-            color: #fff;
-            font-size: 14px;
-        }
-
-        .auth-step-line {
-            flex: 1;
-            height: 2px;
-            background: #E2E8F0;
-            transition: background 0.4s;
-        }
-
-        .auth-step-line.done {
-            background: #10B981;
-        }
-
-        /* Step panels */
+        /* Panels */
         .auth-panel {
             display: none;
-            animation: panelIn 0.3s ease;
+            animation: panelIn 0.25s ease;
         }
 
         .auth-panel.active {
@@ -131,7 +79,7 @@
         @keyframes panelIn {
             from {
                 opacity: 0;
-                transform: translateX(12px);
+                transform: translateX(10px);
             }
 
             to {
@@ -142,19 +90,19 @@
 
         .auth-panel h2 {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--text);
             margin-bottom: 4px;
         }
 
-        .auth-panel p.subtitle {
+        .auth-panel .subtitle {
             font-size: 13px;
             color: var(--text-muted);
             margin-bottom: 24px;
             line-height: 1.5;
         }
 
-        /* Form fields */
+        /* Fields */
         .field-group {
             margin-bottom: 16px;
         }
@@ -186,11 +134,7 @@
             background: #fff;
         }
 
-        .field-group input.error {
-            border-color: #EF4444;
-        }
-
-        /* Phone prefix */
+        /* Phone */
         .phone-wrap {
             display: flex;
             gap: 8px;
@@ -208,6 +152,28 @@
             display: flex;
             align-items: center;
             gap: 4px;
+        }
+
+        /* Password wrap */
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap input {
+            padding-right: 44px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
         }
 
         /* OTP boxes */
@@ -244,27 +210,10 @@
             background: #F0FDF4;
         }
 
-        /* Demo OTP hint */
-        .otp-hint {
-            background: rgba(245, 158, 11, 0.08);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 16px;
-            font-size: 12px;
-            color: #92400E;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .otp-box.error {
+            border-color: #EF4444;
         }
 
-        .otp-hint .material-icons-outlined {
-            font-size: 15px;
-            color: #F59E0B;
-            flex-shrink: 0;
-        }
-
-        /* Resend link */
         .resend-row {
             text-align: center;
             font-size: 13px;
@@ -288,29 +237,7 @@
             cursor: default;
         }
 
-        /* Password toggle */
-        .password-wrap {
-            position: relative;
-        }
-
-        .password-wrap input {
-            padding-right: 44px;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-        }
-
-        /* Error message */
+        /* Error */
         .error-msg {
             background: #FEF2F2;
             border: 1px solid #FECACA;
@@ -332,7 +259,7 @@
             font-size: 16px;
         }
 
-        /* Primary button */
+        /* Buttons */
         .btn-auth {
             width: 100%;
             padding: 13px;
@@ -364,7 +291,6 @@
             box-shadow: none;
         }
 
-        /* Spinner inside button */
         .btn-spinner {
             width: 16px;
             height: 16px;
@@ -389,7 +315,6 @@
             display: none;
         }
 
-        /* Back link */
         .back-link {
             display: flex;
             align-items: center;
@@ -413,28 +338,6 @@
             font-size: 16px;
         }
 
-        /* Mode badge (Login vs Sign Up) */
-        .mode-badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 99px;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        .mode-badge.login {
-            background: rgba(37, 99, 235, 0.10);
-            color: var(--primary);
-        }
-
-        .mode-badge.register {
-            background: rgba(16, 185, 129, 0.10);
-            color: #059669;
-        }
-
-        /* Divider */
         .auth-footer {
             text-align: center;
             font-size: 13px;
@@ -446,6 +349,63 @@
             color: var(--primary);
             font-weight: 600;
             cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* "Forgot password" as a subtle link */
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            transition: opacity 0.2s;
+        }
+
+        .forgot-link:hover {
+            opacity: 0.7;
+        }
+
+        /* Info banner (success-ish) */
+        .info-banner {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #065F46;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-banner .material-icons-outlined {
+            font-size: 16px;
+        }
+
+        /* Email chip shown back on login panel */
+        .email-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #EFF6FF;
+            color: var(--primary);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .email-chip .material-icons-outlined {
+            font-size: 15px;
         }
 
         @media (max-width: 480px) {
@@ -464,140 +424,208 @@
 
     <div class="auth-card">
 
-        <!-- Brand bar -->
+        <!-- Brand -->
         <div class="auth-brand">
-            <img src="./images/logo.png" alt="OurStuff">
+            <img src="./images/logo-white.png" alt="OurStuff">
             <p class="auth-brand-tagline">Rent &amp; Share. Anything.</p>
         </div>
 
         <div class="auth-body">
 
-            <!-- Step progress -->
-            <div class="auth-progress" id="auth-progress">
-                <div class="auth-step-dot active" id="adot-1">1</div>
-                <div class="auth-step-line" id="aline-1"></div>
-                <div class="auth-step-dot" id="adot-2">2</div>
-                <div class="auth-step-line" id="aline-2"></div>
-                <div class="auth-step-dot" id="adot-3">3</div>
-                <div class="auth-step-line" id="aline-3"></div>
-                <div class="auth-step-dot" id="adot-4">4</div>
-            </div>
-
-            <!-- Error banner -->
+            <!-- Shared error banner -->
             <div class="error-msg" id="error-msg">
                 <span class="material-icons-outlined">error_outline</span>
                 <span id="error-text">Something went wrong.</span>
             </div>
 
-            <!-- ===== STEP 1: Email ===== -->
-            <div class="auth-panel active" id="apanel-1">
+            <!-- ===== PANEL: Email entry ===== -->
+            <div class="auth-panel active" id="panel-email">
                 <h2>Welcome to OurStuff</h2>
-                <p class="subtitle">Enter your email to get started. We'll send you a verification code.</p>
+                <p class="subtitle">Enter your email to get started.</p>
 
                 <div class="field-group">
                     <label for="input-email">Email address</label>
                     <input type="email" id="input-email" placeholder="you@example.com" autocomplete="email">
                 </div>
 
-                <button class="btn-auth" id="btn-send-otp">
+                <button class="btn-auth" id="btn-check-email">
                     <div class="btn-spinner"></div>
-                    <span class="btn-text">Send Verification Code</span>
+                    <span class="btn-text">Continue</span>
                 </button>
 
-                <div class="auth-footer">
-                    <a href="index.html">← Back to Home</a>
-                </div>
+                <div class="auth-footer"><a href="index.html">← Back to Home</a></div>
             </div>
 
-            <!-- ===== STEP 2: OTP ===== -->
-            <div class="auth-panel" id="apanel-2">
-                <button class="back-link" id="btn-back-1">
-                    <span class="material-icons-outlined">arrow_back</span> Back
+            <!-- ===== PANEL: Login (existing user) ===== -->
+            <div class="auth-panel" id="panel-login">
+                <button class="back-link" id="btn-back-login">
+                    <span class="material-icons-outlined">arrow_back</span> Change email
+                </button>
+                <h2>Welcome back!</h2>
+                <div class="email-chip">
+                    <span class="material-icons-outlined">mail</span>
+                    <span id="login-email-display"></span>
+                </div>
+
+                <div class="field-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="login-password" placeholder="Enter your password"
+                            autocomplete="current-password">
+                        <button class="password-toggle" id="toggle-login-pass" type="button">
+                            <span class="material-icons-outlined" id="toggle-login-icon">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="forgot-link" id="btn-forgot-password" type="button">Forgot password?</button>
+
+                <button class="btn-auth" id="btn-login">
+                    <div class="btn-spinner"></div>
+                    <span class="btn-text">Log In</span>
+                </button>
+            </div>
+
+            <!-- ===== PANEL: Register OTP ===== -->
+            <div class="auth-panel" id="panel-reg-otp">
+                <button class="back-link" id="btn-back-reg-otp">
+                    <span class="material-icons-outlined">arrow_back</span> Change email
                 </button>
                 <h2>Verify your email</h2>
-                <p class="subtitle">We sent a 6-digit code to <strong id="display-email"></strong>. Check your inbox
-                    (and spam folder).</p>
+                <p class="subtitle">We sent a 6-digit code to <strong id="reg-otp-email"></strong>. Check your inbox.
+                </p>
 
-                <div class="otp-row">
-                    <input class="otp-box" id="otp0" maxlength="1" type="tel" inputmode="numeric">
-                    <input class="otp-box" id="otp1" maxlength="1" type="tel" inputmode="numeric">
-                    <input class="otp-box" id="otp2" maxlength="1" type="tel" inputmode="numeric">
-                    <input class="otp-box" id="otp3" maxlength="1" type="tel" inputmode="numeric">
-                    <input class="otp-box" id="otp4" maxlength="1" type="tel" inputmode="numeric">
-                    <input class="otp-box" id="otp5" maxlength="1" type="tel" inputmode="numeric">
+                <div class="otp-row" id="reg-otp-row">
+                    <input class="otp-box" data-otp="reg" id="r0" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="reg" id="r1" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="reg" id="r2" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="reg" id="r3" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="reg" id="r4" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="reg" id="r5" maxlength="1" type="tel" inputmode="numeric">
                 </div>
-
                 <div class="resend-row">
-                    Didn't receive it? <button id="btn-resend" disabled>Resend in <span
-                            id="resend-timer">30</span>s</button>
+                    Didn't receive it? <button id="btn-reg-resend" disabled>Resend in <span
+                            id="reg-timer">30</span>s</button>
                 </div>
-
-                <button class="btn-auth" id="btn-verify-otp" disabled>
+                <button class="btn-auth" id="btn-verify-reg-otp" disabled>
                     <div class="btn-spinner"></div>
                     <span class="btn-text">Verify Code</span>
                 </button>
             </div>
 
-            <!-- ===== STEP 3: Phone + Name (new users only) ===== -->
-            <div class="auth-panel" id="apanel-3">
-                <button class="back-link" id="btn-back-2">
+            <!-- ===== PANEL: Register Details ===== -->
+            <div class="auth-panel" id="panel-reg-details">
+                <button class="back-link" id="btn-back-reg-details">
                     <span class="material-icons-outlined">arrow_back</span> Back
                 </button>
-                <h2>Your details <span class="mode-badge register" id="mode-badge">New Account</span></h2>
-                <p class="subtitle" id="step3-subtitle">Just a couple more things to set up your account.</p>
-
-                <div class="field-group" id="name-field">
-                    <label for="input-name">Full name</label>
-                    <input type="text" id="input-name" placeholder="Jane Doe" autocomplete="name">
-                </div>
+                <h2>Create your account</h2>
+                <p class="subtitle">Just a couple more things to get you set up.</p>
 
                 <div class="field-group">
-                    <label for="input-phone">Phone number</label>
+                    <label for="reg-name">Full name</label>
+                    <input type="text" id="reg-name" placeholder="Jane Doe" autocomplete="name">
+                </div>
+                <div class="field-group">
+                    <label for="reg-phone">Phone number</label>
                     <div class="phone-wrap">
                         <div class="phone-prefix">🇮🇳 +91</div>
-                        <input type="tel" id="input-phone" placeholder="98765 43210" maxlength="10" inputmode="numeric"
+                        <input type="tel" id="reg-phone" placeholder="98765 43210" maxlength="10" inputmode="numeric"
                             style="flex:1">
                     </div>
                 </div>
-
-                <button class="btn-auth" id="btn-step3-next">
+                <button class="btn-auth" id="btn-reg-details-next">
                     <span class="btn-text">Continue</span>
                 </button>
             </div>
 
-            <!-- ===== STEP 4: Password ===== -->
-            <div class="auth-panel" id="apanel-4">
-                <button class="back-link" id="btn-back-3">
+            <!-- ===== PANEL: Register Set Password ===== -->
+            <div class="auth-panel" id="panel-reg-password">
+                <button class="back-link" id="btn-back-reg-pass">
                     <span class="material-icons-outlined">arrow_back</span> Back
                 </button>
-                <h2 id="step4-title">Set your password</h2>
-                <p class="subtitle" id="step4-subtitle">Choose a secure password for your account.</p>
+                <h2>Set your password</h2>
+                <p class="subtitle">Choose a secure password for your new account.</p>
 
                 <div class="field-group">
-                    <label for="input-password">Password</label>
+                    <label for="reg-password">Password</label>
                     <div class="password-wrap">
-                        <input type="password" id="input-password" placeholder="Min. 6 characters"
+                        <input type="password" id="reg-password" placeholder="Min. 6 characters"
                             autocomplete="new-password">
-                        <button class="password-toggle" id="toggle-pass" type="button">
-                            <span class="material-icons-outlined" id="toggle-pass-icon">visibility</span>
+                        <button class="password-toggle" id="toggle-reg-pass" type="button">
+                            <span class="material-icons-outlined" id="toggle-reg-icon">visibility</span>
                         </button>
                     </div>
                 </div>
-
-                <div class="field-group" id="confirm-field">
-                    <label for="input-confirm">Confirm password</label>
+                <div class="field-group">
+                    <label for="reg-confirm">Confirm password</label>
                     <div class="password-wrap">
-                        <input type="password" id="input-confirm" placeholder="Repeat your password"
+                        <input type="password" id="reg-confirm" placeholder="Repeat your password"
                             autocomplete="new-password">
-                        <button class="password-toggle" id="toggle-confirm" type="button">
-                            <span class="material-icons-outlined" id="toggle-confirm-icon">visibility</span>
+                        <button class="password-toggle" id="toggle-reg-confirm" type="button">
+                            <span class="material-icons-outlined" id="toggle-reg-confirm-icon">visibility</span>
                         </button>
                     </div>
                 </div>
-
-                <button class="btn-auth" id="btn-submit">
+                <button class="btn-auth" id="btn-register">
                     <div class="btn-spinner"></div>
-                    <span class="btn-text" id="btn-submit-text">Create Account</span>
+                    <span class="btn-text">Create Account</span>
+                </button>
+            </div>
+
+            <!-- ===== PANEL: Forgot Password — Send OTP ===== -->
+            <div class="auth-panel" id="panel-forgot-otp">
+                <button class="back-link" id="btn-back-forgot-otp">
+                    <span class="material-icons-outlined">arrow_back</span> Back to login
+                </button>
+                <h2>Reset your password</h2>
+                <p class="subtitle">We'll send a 6-digit code to <strong id="forgot-otp-email"></strong> to verify it's
+                    you.</p>
+
+                <div class="otp-row">
+                    <input class="otp-box" data-otp="forgot" id="f0" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="forgot" id="f1" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="forgot" id="f2" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="forgot" id="f3" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="forgot" id="f4" maxlength="1" type="tel" inputmode="numeric">
+                    <input class="otp-box" data-otp="forgot" id="f5" maxlength="1" type="tel" inputmode="numeric">
+                </div>
+                <div class="resend-row">
+                    Didn't receive it? <button id="btn-forgot-resend" disabled>Resend in <span
+                            id="forgot-timer">30</span>s</button>
+                </div>
+                <button class="btn-auth" id="btn-verify-forgot-otp" disabled>
+                    <div class="btn-spinner"></div>
+                    <span class="btn-text">Verify Code</span>
+                </button>
+            </div>
+
+            <!-- ===== PANEL: Forgot Password — New Password ===== -->
+            <div class="auth-panel" id="panel-new-password">
+                <h2>Set new password</h2>
+                <p class="subtitle">Almost done. Choose a new password for your account.</p>
+
+                <div class="field-group">
+                    <label for="new-password">New password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="new-password" placeholder="Min. 6 characters"
+                            autocomplete="new-password">
+                        <button class="password-toggle" id="toggle-new-pass" type="button">
+                            <span class="material-icons-outlined" id="toggle-new-icon">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label for="new-password-confirm">Confirm new password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="new-password-confirm" placeholder="Repeat password"
+                            autocomplete="new-password">
+                        <button class="password-toggle" id="toggle-new-confirm" type="button">
+                            <span class="material-icons-outlined" id="toggle-new-confirm-icon">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn-auth" id="btn-reset-password">
+                    <div class="btn-spinner"></div>
+                    <span class="btn-text">Reset Password &amp; Log In</span>
                 </button>
             </div>
 
@@ -607,18 +635,27 @@
     <script>
         const API = 'http://localhost:5000/api';
 
-        // ─── State ─────────────────────────────────────────────────────
+        // ─── State ─────────────────────────────────────────────────
         let currentEmail = '';
-        let isExisting = false; // true = login, false = register
-        let currentStep = 1;
-        let resendTimer = null;
+        let forgotOtpValue = '';   // stores verified OTP for reset-password call
+        let regTimerInterval = null;
+        let forgotTimerInterval = null;
 
-        // ─── Helpers ───────────────────────────────────────────────────
+        // ─── Redirect if already logged in ─────────────────────────
+        if (localStorage.getItem('token')) window.location.href = 'index.html';
+
+        // ─── Panel navigation ───────────────────────────────────────
+        function showPanel(id) {
+            hideError();
+            document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // ─── Error helpers ──────────────────────────────────────────
         function showError(msg) {
             document.getElementById('error-text').textContent = msg;
             document.getElementById('error-msg').classList.add('show');
         }
-
         function hideError() {
             document.getElementById('error-msg').classList.remove('show');
         }
@@ -628,39 +665,89 @@
             btn.classList.toggle('loading', yes);
         }
 
-        function goStep(n) {
-            hideError();
-            document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
-            document.getElementById('apanel-' + n).classList.add('active');
-            updateProgress(n);
-            currentStep = n;
+        // ─── Password visibility toggle ─────────────────────────────
+        function makeToggle(btnId, inputId, iconId) {
+            document.getElementById(btnId).addEventListener('click', () => {
+                const inp = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+                if (inp.type === 'password') { inp.type = 'text'; icon.textContent = 'visibility_off'; }
+                else { inp.type = 'password'; icon.textContent = 'visibility'; }
+            });
+        }
+        makeToggle('toggle-login-pass', 'login-password', 'toggle-login-icon');
+        makeToggle('toggle-reg-pass', 'reg-password', 'toggle-reg-icon');
+        makeToggle('toggle-reg-confirm', 'reg-confirm', 'toggle-reg-confirm-icon');
+        makeToggle('toggle-new-pass', 'new-password', 'toggle-new-icon');
+        makeToggle('toggle-new-confirm', 'new-password-confirm', 'toggle-new-confirm-icon');
+
+        // ─── OTP box wiring ─────────────────────────────────────────
+        function wireOtpBoxes(ids, checkFn) {
+            const boxes = ids.map(id => document.getElementById(id));
+            boxes.forEach((box, idx) => {
+                box.addEventListener('input', e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    box.value = val.slice(-1);
+                    box.classList.toggle('filled', !!box.value);
+                    if (val && idx < boxes.length - 1) boxes[idx + 1].focus();
+                    checkFn(boxes);
+                });
+                box.addEventListener('keydown', e => {
+                    if (e.key === 'Backspace' && !box.value && idx > 0) boxes[idx - 1].focus();
+                });
+                box.addEventListener('paste', e => {
+                    e.preventDefault();
+                    const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                    pasted.split('').slice(0, 6).forEach((ch, i) => {
+                        if (boxes[i]) { boxes[i].value = ch; boxes[i].classList.add('filled'); }
+                    });
+                    checkFn(boxes);
+                    boxes[Math.min(pasted.length, boxes.length - 1)].focus();
+                });
+            });
+            return boxes;
         }
 
-        function updateProgress(n) {
-            for (let i = 1; i <= 4; i++) {
-                const dot = document.getElementById('adot-' + i);
-                dot.classList.remove('active', 'done');
-                dot.textContent = i;
-                if (i < n) { dot.classList.add('done'); dot.textContent = '✓'; }
-                if (i === n) dot.classList.add('active');
-            }
-            for (let i = 1; i <= 3; i++) {
-                document.getElementById('aline-' + i).classList.toggle('done', i < n);
-            }
+        const regOtpBoxes = wireOtpBoxes(['r0', 'r1', 'r2', 'r3', 'r4', 'r5'], boxes => {
+            document.getElementById('btn-verify-reg-otp').disabled = boxes.map(b => b.value).join('').length < 6;
+        });
+        const forgotOtpBoxes = wireOtpBoxes(['f0', 'f1', 'f2', 'f3', 'f4', 'f5'], boxes => {
+            document.getElementById('btn-verify-forgot-otp').disabled = boxes.map(b => b.value).join('').length < 6;
+        });
+
+        function getOtp(boxes) { return boxes.map(b => b.value).join(''); }
+        function clearOtpBoxes(boxes) { boxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); }); }
+
+        // ─── Countdown timer ────────────────────────────────────────
+        function startTimer(timerElId, resendBtnId, interval) {
+            clearInterval(interval);
+            let secs = 30;
+            const timerEl = document.getElementById(timerElId);
+            const resendBtn = document.getElementById(resendBtnId);
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = `Resend in <span id="${timerElId}">${secs}</span>s`;
+            return setInterval(() => {
+                secs--;
+                const el = document.getElementById(timerElId);
+                if (el) el.textContent = secs;
+                if (secs <= 0) {
+                    clearInterval(interval);
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = 'Resend code';
+                }
+            }, 1000);
         }
 
-        // ─── STEP 1: Send OTP ──────────────────────────────────────────
-        document.getElementById('btn-send-otp').addEventListener('click', async () => {
+        // ─── STEP 1: Check email ────────────────────────────────────
+        async function checkEmail() {
             const email = document.getElementById('input-email').value.trim();
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 return showError('Please enter a valid email address.');
             }
             hideError();
-            const btn = document.getElementById('btn-send-otp');
+            const btn = document.getElementById('btn-check-email');
             setLoading(btn, true);
-
             try {
-                const res = await fetch(`${API}/auth/send-otp`, {
+                const res = await fetch(`${API}/auth/check-email`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
@@ -670,60 +757,94 @@
 
                 currentEmail = email;
 
-                document.getElementById('display-email').textContent = email;
-
-                goStep(2);
-                startResendTimer();
-                document.getElementById('otp0').focus();
+                if (data.exists) {
+                    // Existing user → show login panel
+                    document.getElementById('login-email-display').textContent = email;
+                    showPanel('panel-login');
+                    document.getElementById('login-password').focus();
+                } else {
+                    // New user → send OTP then show OTP panel
+                    await sendOtpAndShowPanel(email, 'reg');
+                }
             } catch (e) {
-                showError(e.message || 'Failed to send OTP. Is the server running?');
+                showError(e.message || 'Failed to connect. Is the server running?');
+            } finally {
+                setLoading(btn, false);
+            }
+        }
+
+        document.getElementById('btn-check-email').addEventListener('click', checkEmail);
+        document.getElementById('input-email').addEventListener('keydown', e => { if (e.key === 'Enter') checkEmail(); });
+
+        // ─── Send OTP helper ────────────────────────────────────────
+        async function sendOtpAndShowPanel(email, type) {
+            const res = await fetch(`${API}/auth/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+
+            if (type === 'reg') {
+                document.getElementById('reg-otp-email').textContent = email;
+                clearOtpBoxes(regOtpBoxes);
+                showPanel('panel-reg-otp');
+                regTimerInterval = startTimer('reg-timer', 'btn-reg-resend', regTimerInterval);
+                regOtpBoxes[0].focus();
+            } else {
+                document.getElementById('forgot-otp-email').textContent = email;
+                clearOtpBoxes(forgotOtpBoxes);
+                showPanel('panel-forgot-otp');
+                forgotTimerInterval = startTimer('forgot-timer', 'btn-forgot-resend', forgotTimerInterval);
+                forgotOtpBoxes[0].focus();
+            }
+        }
+
+        // ─── LOGIN ──────────────────────────────────────────────────
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const password = document.getElementById('login-password').value;
+            if (!password) return showError('Please enter your password.');
+
+            const btn = document.getElementById('btn-login');
+            setLoading(btn, true);
+            hideError();
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail, password }),
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || data.errors?.[0]?.msg);
+                saveAndRedirect(data);
+            } catch (e) {
+                showError(e.message || 'Login failed. Please try again.');
             } finally {
                 setLoading(btn, false);
             }
         });
 
-        // Enter key on email field
-        document.getElementById('input-email').addEventListener('keydown', e => {
-            if (e.key === 'Enter') document.getElementById('btn-send-otp').click();
+        document.getElementById('login-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('btn-login').click();
         });
 
-        // ─── STEP 2: OTP boxes ─────────────────────────────────────────
-        const otpBoxes = Array.from({ length: 6 }, (_, i) => document.getElementById('otp' + i));
-
-        otpBoxes.forEach((box, idx) => {
-            box.addEventListener('input', e => {
-                const val = e.target.value.replace(/\D/g, '');
-                box.value = val.slice(-1);
-                box.classList.toggle('filled', !!box.value);
-                if (val && idx < 5) otpBoxes[idx + 1].focus();
-                checkOtpFilled();
-            });
-            box.addEventListener('keydown', e => {
-                if (e.key === 'Backspace' && !box.value && idx > 0) otpBoxes[idx - 1].focus();
-            });
-            box.addEventListener('paste', e => {
-                e.preventDefault();
-                const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
-                pasted.split('').slice(0, 6).forEach((ch, i) => {
-                    if (otpBoxes[i]) { otpBoxes[i].value = ch; otpBoxes[i].classList.add('filled'); }
-                });
-                checkOtpFilled();
-                otpBoxes[Math.min(pasted.length, 5)].focus();
-            });
+        // ─── FORGOT PASSWORD — trigger from login panel ─────────────
+        document.getElementById('btn-forgot-password').addEventListener('click', async () => {
+            hideError();
+            try {
+                await sendOtpAndShowPanel(currentEmail, 'forgot');
+            } catch (e) {
+                showError(e.message || 'Failed to send reset email.');
+            }
         });
 
-        function getOtpValue() { return otpBoxes.map(b => b.value).join(''); }
-
-        function checkOtpFilled() {
-            document.getElementById('btn-verify-otp').disabled = getOtpValue().length < 6;
-        }
-
-        // ─── STEP 2: Verify OTP ────────────────────────────────────────
-        document.getElementById('btn-verify-otp').addEventListener('click', async () => {
-            const otp = getOtpValue();
-            const btn = document.getElementById('btn-verify-otp');
+        // ─── REGISTER OTP — verify ──────────────────────────────────
+        document.getElementById('btn-verify-reg-otp').addEventListener('click', async () => {
+            const otp = getOtp(regOtpBoxes);
+            const btn = document.getElementById('btn-verify-reg-otp');
             setLoading(btn, true);
-
+            hideError();
             try {
                 const res = await fetch(`${API}/auth/verify-otp`, {
                     method: 'POST',
@@ -732,162 +853,140 @@
                 });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message);
-
-                isExisting = data.isExistingUser;
-                setupStep3(isExisting);
-                goStep(3);
+                showPanel('panel-reg-details');
+                document.getElementById('reg-name').focus();
             } catch (e) {
                 showError(e.message || 'OTP verification failed.');
-                otpBoxes.forEach(b => b.classList.add('error'));
+                regOtpBoxes.forEach(b => b.classList.add('error'));
             } finally {
                 setLoading(btn, false);
             }
         });
 
-        // ─── Resend OTP timer ──────────────────────────────────────────
-        function startResendTimer() {
-            let secs = 30;
-            const timerEl = document.getElementById('resend-timer');
-            const resendBtn = document.getElementById('btn-resend');
-            resendBtn.disabled = true;
-            clearInterval(resendTimer);
-            resendTimer = setInterval(() => {
-                secs--;
-                timerEl.textContent = secs;
-                if (secs <= 0) {
-                    clearInterval(resendTimer);
-                    resendBtn.disabled = false;
-                    resendBtn.textContent = 'Resend code';
-                }
-            }, 1000);
-        }
-
-        document.getElementById('btn-resend').addEventListener('click', async () => {
-            document.getElementById('btn-resend').textContent = 'Sending…';
+        // ─── REGISTER — resend OTP ──────────────────────────────────
+        document.getElementById('btn-reg-resend').addEventListener('click', async () => {
+            document.getElementById('btn-reg-resend').textContent = 'Sending…';
             try {
-                const res = await fetch(`${API}/auth/send-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: currentEmail }),
-                });
-                const data = await res.json();
-                otpBoxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); });
-                startResendTimer();
-            } catch { }
+                await sendOtpAndShowPanel(currentEmail, 'reg');
+            } catch (_) { }
         });
 
-        // ─── STEP 3: Setup ─────────────────────────────────────────────
-        function setupStep3(existing) {
-            const nameField = document.getElementById('name-field');
-            const badge = document.getElementById('mode-badge');
-            const subtitle = document.getElementById('step3-subtitle');
-
-            if (existing) {
-                nameField.style.display = 'none';
-                badge.textContent = 'Logging in';
-                badge.className = 'mode-badge login';
-                subtitle.textContent = 'Confirm your phone number to continue.';
-            } else {
-                nameField.style.display = 'block';
-                badge.textContent = 'New Account';
-                badge.className = 'mode-badge register';
-                subtitle.textContent = 'Just a couple more things to set up your account.';
-            }
-
-            // Step 4 text
-            document.getElementById('step4-title').textContent = existing ? 'Enter your password' : 'Set your password';
-            document.getElementById('step4-subtitle').textContent = existing ? 'Enter the password for your account.' : 'Choose a secure password for your account.';
-            document.getElementById('btn-submit-text').textContent = existing ? 'Log In' : 'Create Account';
-            document.getElementById('confirm-field').style.display = existing ? 'none' : 'block';
-        }
-
-        document.getElementById('btn-step3-next').addEventListener('click', () => {
-            const phone = document.getElementById('input-phone').value.trim();
-            const name = document.getElementById('input-name').value.trim();
-
-            if (!isExisting && !name) return showError('Please enter your full name.');
-            if (!phone || phone.length < 10) return showError('Please enter a valid 10-digit mobile number.');
-
+        // ─── REGISTER DETAILS — next ────────────────────────────────
+        document.getElementById('btn-reg-details-next').addEventListener('click', () => {
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            if (!name) return showError('Please enter your full name.');
+            if (phone.length < 10) return showError('Please enter a valid 10-digit mobile number.');
             hideError();
-            goStep(4);
+            showPanel('panel-reg-password');
+            document.getElementById('reg-password').focus();
         });
 
-        // ─── STEP 4: Submit ────────────────────────────────────────────
-        document.getElementById('btn-submit').addEventListener('click', async () => {
-            const password = document.getElementById('input-password').value;
-            const confirm = document.getElementById('input-confirm').value;
-
+        // ─── REGISTER — create account ──────────────────────────────
+        document.getElementById('btn-register').addEventListener('click', async () => {
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
             if (!password || password.length < 6) return showError('Password must be at least 6 characters.');
-            if (!isExisting && password !== confirm) return showError('Passwords do not match.');
+            if (password !== confirm) return showError('Passwords do not match.');
 
-            const btn = document.getElementById('btn-submit');
+            const btn = document.getElementById('btn-register');
             setLoading(btn, true);
             hideError();
-
             try {
-                let res, data;
-                const phone = '+91' + document.getElementById('input-phone').value.trim();
-
-                if (isExisting) {
-                    // LOGIN
-                    res = await fetch(`${API}/auth/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: currentEmail, password }),
-                    });
-                    data = await res.json();
-                    if (!data.success) throw new Error(data.message || (data.errors?.[0]?.msg));
-                } else {
-                    // REGISTER
-                    const name = document.getElementById('input-name').value.trim();
-                    res = await fetch(`${API}/auth/register`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, email: currentEmail, password, phone }),
-                    });
-                    data = await res.json();
-                    if (!data.success) throw new Error(data.message || (data.errors?.[0]?.msg));
-                }
-
-                // Save session
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-
-                // Redirect: if not verified → verify-identity, else home
-                // (they can skip on verify-identity page)
-                window.location.href = 'verify-identity.html?from=login';
-
+                const name = document.getElementById('reg-name').value.trim();
+                const phone = '+91' + document.getElementById('reg-phone').value.trim();
+                const res = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email: currentEmail, password, phone }),
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || data.errors?.[0]?.msg);
+                saveAndRedirect(data);
             } catch (e) {
-                showError(e.message || 'Something went wrong. Please try again.');
+                showError(e.message || 'Registration failed. Please try again.');
             } finally {
                 setLoading(btn, false);
             }
         });
 
-        // ─── Back buttons ──────────────────────────────────────────────
-        document.getElementById('btn-back-1').addEventListener('click', () => {
-            otpBoxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); });
-            goStep(1);
+        // ─── FORGOT OTP — verify ────────────────────────────────────
+        document.getElementById('btn-verify-forgot-otp').addEventListener('click', async () => {
+            const otp = getOtp(forgotOtpBoxes);
+            const btn = document.getElementById('btn-verify-forgot-otp');
+            setLoading(btn, true);
+            hideError();
+            try {
+                // We verify by attempting to use it via backend — but we keep the otp
+                // to pass to reset-password together with the new password.
+                // Use /verify-otp only for validation; the otp is re-sent to reset-password.
+                // Simplest: just proceed locally (the server will re-check on reset-password).
+                // However, verify-otp deletes the OTP from store on success, so we'd lose it.
+                // Solution: skip verify-otp here, go straight to new-password panel and pass OTP along.
+                if (otp.length !== 6) throw new Error('Please enter all 6 digits.');
+                forgotOtpValue = otp;   // store for reset-password call
+                showPanel('panel-new-password');
+                document.getElementById('new-password').focus();
+            } catch (e) {
+                showError(e.message);
+            } finally {
+                setLoading(btn, false);
+            }
         });
-        document.getElementById('btn-back-2').addEventListener('click', () => goStep(2));
-        document.getElementById('btn-back-3').addEventListener('click', () => goStep(3));
 
-        // ─── Password toggles ──────────────────────────────────────────
-        function makeToggle(btnId, inputId, iconId) {
-            document.getElementById(btnId).addEventListener('click', () => {
-                const inp = document.getElementById(inputId);
-                const icon = document.getElementById(iconId);
-                if (inp.type === 'password') { inp.type = 'text'; icon.textContent = 'visibility_off'; }
-                else { inp.type = 'password'; icon.textContent = 'visibility'; }
-            });
-        }
-        makeToggle('toggle-pass', 'input-password', 'toggle-pass-icon');
-        makeToggle('toggle-confirm', 'input-confirm', 'toggle-confirm-icon');
+        // ─── FORGOT — resend OTP ────────────────────────────────────
+        document.getElementById('btn-forgot-resend').addEventListener('click', async () => {
+            document.getElementById('btn-forgot-resend').textContent = 'Sending…';
+            try {
+                await sendOtpAndShowPanel(currentEmail, 'forgot');
+                forgotOtpValue = '';
+            } catch (_) { }
+        });
 
-        // ─── Already logged in? ────────────────────────────────────────
-        if (localStorage.getItem('token')) {
-            window.location.href = 'index.html';
+        // ─── RESET PASSWORD ─────────────────────────────────────────
+        document.getElementById('btn-reset-password').addEventListener('click', async () => {
+            const newPassword = document.getElementById('new-password').value;
+            const confirm = document.getElementById('new-password-confirm').value;
+            if (!newPassword || newPassword.length < 6) return showError('Password must be at least 6 characters.');
+            if (newPassword !== confirm) return showError('Passwords do not match.');
+
+            const btn = document.getElementById('btn-reset-password');
+            setLoading(btn, true);
+            hideError();
+            try {
+                const res = await fetch(`${API}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail, otp: forgotOtpValue, newPassword }),
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || data.errors?.[0]?.msg);
+                saveAndRedirect(data);
+            } catch (e) {
+                showError(e.message || 'Password reset failed. Please try again.');
+                // If OTP was wrong or expired, go back to OTP panel
+                if (e.message && e.message.toLowerCase().includes('otp')) {
+                    setTimeout(() => showPanel('panel-forgot-otp'), 800);
+                }
+            } finally {
+                setLoading(btn, false);
+            }
+        });
+
+        // ─── Save token + redirect ──────────────────────────────────
+        function saveAndRedirect(data) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            const redirect = new URLSearchParams(window.location.search).get('redirect');
+            window.location.href = redirect ? decodeURIComponent(redirect) : 'index.html';
         }
+
+        // ─── Back buttons ────────────────────────────────────────────
+        document.getElementById('btn-back-login').addEventListener('click', () => showPanel('panel-email'));
+        document.getElementById('btn-back-reg-otp').addEventListener('click', () => showPanel('panel-email'));
+        document.getElementById('btn-back-reg-details').addEventListener('click', () => showPanel('panel-reg-otp'));
+        document.getElementById('btn-back-reg-pass').addEventListener('click', () => showPanel('panel-reg-details'));
+        document.getElementById('btn-back-forgot-otp').addEventListener('click', () => showPanel('panel-login'));
     </script>
 
 </body>

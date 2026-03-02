@@ -41,11 +41,25 @@ const itemSchema = new mongoose.Schema({
         default: 0,
     },
     images: [{ type: String }],
+
+    // Human-readable location name (e.g. "Kottayam")
     location: {
         type: String,
         required: [true, 'Location is required'],
         trim: true,
     },
+
+    // GeoJSON Point — required for $nearSphere radius searches
+    geoLocation: {
+        type: {
+            type: String,
+            enum: ['Point'],
+        },
+        coordinates: {
+            type: [Number], // [longitude, latitude]
+        },
+    },
+
     isAvailable: {
         type: Boolean,
         default: true,
@@ -65,5 +79,11 @@ const itemSchema = new mongoose.Schema({
 
 // Full-text search index on title and description
 itemSchema.index({ title: 'text', description: 'text' });
+
+// 2dsphere index on the GeoJSON field — mandatory for proximity searches
+itemSchema.index({ geoLocation: '2dsphere' });
+
+itemSchema.index({ owner: 1, createdAt: -1 });
+itemSchema.index({ category: 1, isAvailable: 1 });
 
 module.exports = mongoose.model('Item', itemSchema);
