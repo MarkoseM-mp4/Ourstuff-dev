@@ -12,7 +12,10 @@ const notificationSchema = new mongoose.Schema({
             'rental_request',    // Someone wants to rent your item
             'rental_accepted',   // Owner accepted your rental
             'rental_rejected',   // Owner rejected your rental
+            'rental_active',     // Item was delivered, rental is active
+            'return_otp',        // OTP generated for item return
             'rental_completed',  // Rental marked complete
+            'rental_cancelled',  // Rental cancelled
             'community_respond', // Someone responded to your community request
             'review_received',   // You got a new review
             'item_listed',       // Confirmation of item listed
