@@ -1,4 +1,4 @@
-const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.') || window.location.hostname.startsWith('10.');
+const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.') || window.location.hostname.startsWith('10.') || window.location.hostname.startsWith('172.');
 const PROD_API = 'https://ourstuff-dev-backend.onrender.com/api'; // NOTE: Update this URL after deploying your backend!
 const API = IS_LOCAL ? `http://${window.location.hostname}:5000/api` : PROD_API;
 
