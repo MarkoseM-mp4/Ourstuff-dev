@@ -47,7 +47,10 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (Postman, curl, mobile apps)
         // and requests from file:// (origin === undefined or 'null')
-        if (!origin || origin === 'null' || allowedOrigins.includes(origin)) {
+        if (!origin || origin === 'null' || allowedOrigins.includes(origin) ||
+            origin.startsWith('http://192.168.') ||
+            origin.startsWith('http://172.') ||
+            origin.startsWith('http://10.')) {
             callback(null, true);
         } else {
             callback(new Error(`CORS: origin ${origin} not allowed`));
