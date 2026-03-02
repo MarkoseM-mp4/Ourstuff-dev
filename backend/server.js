@@ -31,6 +31,7 @@ app.use(helmet({ crossOriginResourcePolicy: false })); // Basic security headers
 app.use(compression()); // Gzip compress responses for speed
 const allowedOrigins = [
     process.env.CLIENT_URL,
+    'https://ourstuff-dev-frontend.onrender.com',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:5173',
