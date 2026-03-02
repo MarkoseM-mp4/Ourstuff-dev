@@ -1,5 +1,5 @@
 const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const PROD_API = 'https://ourstuff-backend.onrender.com/api'; // NOTE: Update this URL after deploying your backend!
+const PROD_API = 'https://ourstuff-dev-backend.onrender.com/api'; // NOTE: Update this URL after deploying your backend!
 const API = IS_LOCAL ? 'http://127.0.0.1:5000/api' : PROD_API;
 
 // ============================================================
