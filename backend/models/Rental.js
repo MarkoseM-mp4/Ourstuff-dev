@@ -56,6 +56,14 @@ const rentalSchema = new mongoose.Schema({
     },
     reviewedByRenter: { type: Boolean, default: false },
     reviewedByOwner: { type: Boolean, default: false },
+
+    // Feature: Report Issue
+    issueReported: { type: Boolean, default: false },
+    issueDescription: { type: String },
+
+    // Feature: Extend Time
+    extensionRequested: { type: Boolean, default: false },
+    extensionDays: { type: Number },
 }, {
     timestamps: true,
 });

@@ -287,6 +287,57 @@
         </div>
     </div>
 
+    <!-- Report Issue Modal -->
+    <div class="modal-overlay" id="report-issue-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Report an Issue</h2>
+                <button class="modal-close"
+                    onclick="document.getElementById('report-issue-modal').classList.remove('open')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);">
+                Describe the issue with the item you received. The owner will be notified to resolve it with you.
+            </p>
+            <div class="form-group">
+                <label>Issue Description *</label>
+                <textarea id="issue-desc-input" rows="4" placeholder="e.g. Item is damaged, or missing parts..."
+                    style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;"></textarea>
+            </div>
+            <button class="btn-modal-submit" id="btn-submit-issue" style="margin-top: 10px; background: #DC2626;">
+                <span class="material-icons-outlined">flag</span>
+                Report Issue
+            </button>
+        </div>
+    </div>
+
+    <!-- Extend Time Modal -->
+    <div class="modal-overlay" id="extend-time-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Request Time Extension</h2>
+                <button class="modal-close"
+                    onclick="document.getElementById('extend-time-modal').classList.remove('open')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);">
+                How many extra days do you need? A request will be sent to the owner for approval. Your total price will
+                increase accordingly.
+            </p>
+            <div class="form-group">
+                <label>Additional Days *</label>
+                <input type="number" id="extend-days-input" min="1" value="1"
+                    style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
+            </div>
+            <button class="btn-modal-submit" id="btn-submit-extend" style="margin-top: 10px;">
+                <span class="material-icons-outlined">update</span>
+                Request Extension
+            </button>
+        </div>
+    </div>
+
     <script src="js/dashboard.js"></script>
 </body>
 

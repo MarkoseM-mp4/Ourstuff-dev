@@ -311,5 +311,136 @@ const completeReturn = async (req, res, next) => {
         next(err);
     }
 };
+// @desc    Report an issue with the rental
+// @route   POST /api/rentals/:id/report-issue
+// @access  Private
+const reportIssue = async (req, res, next) => {
+    try {
+        const { description } = req.body;
+        const rental = await Rental.findById(req.params.id).populate('item', 'title');
 
-module.exports = { createRental, getRentals, getRental, updateRentalStatus, deliverRental, requestReturn, completeReturn };
+        if (!rental) return res.status(404).json({ success: false, message: 'Rental not found' });
+        if (rental.renter.toString() !== req.user._id.toString() && rental.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        rental.issueReported = true;
+        rental.issueDescription = description;
+        await rental.save();
+
+        const recipient = rental.renter.toString() === req.user._id.toString() ? rental.owner : rental.renter;
+
+        await Notification.create({
+            recipient: recipient,
+            type: 'rental_issue_reported',
+            message: `An issue was reported for "${rental.item.title}": ${description}`,
+            rental: rental._id,
+            item: rental.item._id,
+        });
+
+        res.json({ success: true, message: 'Issue reported successfully' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Request rental extension
+// @route   POST /api/rentals/:id/extend
+// @access  Private
+const requestExtension = async (req, res, next) => {
+    try {
+        const { days } = req.body;
+        const rental = await Rental.findById(req.params.id).populate('item', 'title');
+
+        if (!rental) return res.status(404).json({ success: false, message: 'Rental not found' });
+        if (rental.renter.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Only renter can request extension' });
+        }
+
+        rental.extensionRequested = true;
+        rental.extensionDays = days;
+        await rental.save();
+
+        await Notification.create({
+            recipient: rental.owner,
+            type: 'rental_extension_requested',
+            message: `The renter of "${rental.item.title}" has requested to extend the rental by ${days} day(s).`,
+            rental: rental._id,
+            item: rental.item._id,
+        });
+
+        res.json({ success: true, message: 'Extension requested successfully' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Handle rental extension (accept/reject)
+// @route   POST /api/rentals/:id/extend-status
+// @access  Private
+const handleExtensionStatus = async (req, res, next) => {
+    try {
+        const { action } = req.body; // 'accept' or 'reject'
+        const rental = await Rental.findById(req.params.id).populate('item', 'title pricePerDay');
+
+        if (!rental) return res.status(404).json({ success: false, message: 'Rental not found' });
+        if (rental.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Only owner can handle extension' });
+        }
+        if (!rental.extensionRequested) {
+            return res.status(400).json({ success: false, message: 'No extension requested' });
+        }
+
+        if (action === 'accept') {
+            const extraDays = rental.extensionDays;
+            rental.totalDays += extraDays;
+
+            // Recalculate end date
+            const newToDate = new Date(rental.toDate);
+            newToDate.setDate(newToDate.getDate() + extraDays);
+
+            // Append the new block to bookedDates
+            await require('../models/Item').findByIdAndUpdate(rental.item._id, {
+                $push: { bookedDates: { from: new Date(rental.toDate), to: newToDate } }
+            });
+
+            rental.toDate = newToDate;
+            rental.totalPrice += (extraDays * rental.item.pricePerDay);
+
+            rental.extensionRequested = false;
+            rental.extensionDays = 0;
+            await rental.save();
+
+            await Notification.create({
+                recipient: rental.renter,
+                type: 'rental_extension_accepted',
+                message: `Your extension request for "${rental.item.title}" was accepted!`,
+                rental: rental._id,
+                item: rental.item._id,
+            });
+
+            res.json({ success: true, message: 'Extension accepted' });
+        } else {
+            rental.extensionRequested = false;
+            rental.extensionDays = 0;
+            await rental.save();
+
+            await Notification.create({
+                recipient: rental.renter,
+                type: 'rental_extension_rejected',
+                message: `Your extension request for "${rental.item.title}" was declined. Please return the item on time.`,
+                rental: rental._id,
+                item: rental.item._id,
+            });
+
+            res.json({ success: true, message: 'Extension rejected' });
+        }
+    } catch (err) {
+        next(err);
+    }
+};
+
+module.exports = {
+    createRental, getRentals, getRental, updateRentalStatus, deliverRental,
+    requestReturn, completeReturn, reportIssue, requestExtension, handleExtensionStatus
+};

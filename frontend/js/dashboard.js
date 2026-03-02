@@ -376,18 +376,35 @@ function renderActiveRentals(rentals) {
             const twoHoursMs = 2 * 60 * 60 * 1000;
             const isWithinTwoHours = (Date.now() - deliveredAt) <= twoHoursMs;
 
-            if (isWithinTwoHours) {
+            if (isWithinTwoHours && !r.issueReported) {
                 actions += `
-                    <button class="btn-reject" onclick="alert('Report an Issue feature is coming soon!')">
+                    <button class="btn-reject" onclick="openReportIssueModal('${r._id}')">
                         <span class="material-icons-outlined">report_problem</span> Report Issue
+                    </button>
+                `;
+            } else if (r.issueReported) {
+                actions += `
+                    <span style="font-size: 13px; color: #DC2626; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-icons-outlined" style="font-size: 15px;">report</span> Issue Reported
+                    </span>
+                `;
+            }
+
+            if (r.extensionRequested) {
+                actions += `
+                    <span style="font-size: 13px; color: #D97706; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-icons-outlined" style="font-size: 15px;">hourglass_empty</span> Extension Pending
+                    </span>
+                `;
+            } else {
+                actions += `
+                    <button class="btn-panel-action-ghost" onclick="openExtendTimeModal('${r._id}')">
+                        <span class="material-icons-outlined">update</span> Extend Time
                     </button>
                 `;
             }
 
             actions += `
-                <button class="btn-panel-action-ghost" onclick="alert('Extend Time feature is coming soon!')">
-                    <span class="material-icons-outlined">update</span> Extend Time
-                </button>
                 <button class="btn-accept" data-return-id="${r._id}">
                     <span class="material-icons-outlined">assignment_return</span> Return Item
                 </button>
@@ -613,6 +630,23 @@ function renderOwnerRentals(rentals) {
                         <span class="material-icons-outlined">local_shipping</span> Item Delivered
                     </button>
                 </div>`;
+        } else if (r.status === 'active') {
+            if (r.extensionRequested) {
+                actions = `
+                    <div class="rental-actions" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 13px; color: #D97706; font-weight: 500;">
+                            Renter wants to extend by ${r.extensionDays} day(s).
+                        </span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-accept" data-extend-rental="${r._id}" data-action="accept">
+                                <span class="material-icons-outlined">check</span> Accept Extension
+                            </button>
+                            <button class="btn-reject" data-extend-rental="${r._id}" data-action="reject">
+                                <span class="material-icons-outlined">close</span> Decline
+                            </button>
+                        </div>
+                    </div>`;
+            }
         }
 
         row.innerHTML = `
@@ -640,6 +674,10 @@ function renderOwnerRentals(rentals) {
 
         row.querySelectorAll('[data-deliver-rental]').forEach(btn => {
             btn.addEventListener('click', () => showDeliverModal(btn.dataset.deliverRental));
+        });
+
+        row.querySelectorAll('[data-extend-rental]').forEach(btn => {
+            btn.addEventListener('click', () => handleExtensionStatus(btn.dataset.extendRental, btn.dataset.action));
         });
 
         list.appendChild(row);
@@ -849,6 +887,121 @@ document.getElementById('btn-mark-all-read')?.addEventListener('click', async ()
         showToast(err.message || 'Failed', 'error');
     }
 });
+
+// ============================================================
+//  REPORT ISSUE (as renter)
+// ============================================================
+let currentIssueRentalId = null;
+
+window.openReportIssueModal = function (rentalId) {
+    currentIssueRentalId = rentalId;
+    document.getElementById('issue-desc-input').value = '';
+    document.getElementById('report-issue-modal').classList.add('open');
+};
+
+document.getElementById('btn-submit-issue')?.addEventListener('click', async () => {
+    if (!currentIssueRentalId) return;
+    const desc = document.getElementById('issue-desc-input').value.trim();
+    if (!desc) {
+        showToast('Please describe the issue', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-submit-issue');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-icons-outlined" style="animation:spin 1s linear infinite;">sync</span>...';
+
+    try {
+        const res = await fetch(`${API_URL}/rentals/${currentIssueRentalId}/report-issue`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ description: desc })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+
+        showToast('Issue reported successfully. Owner notified.', 'success');
+        document.getElementById('report-issue-modal').classList.remove('open');
+        currentIssueRentalId = null;
+        loadDashboard(); // reload 
+    } catch (err) {
+        showToast(err.message || 'Failed to report issue', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons-outlined">flag</span>Report Issue';
+    }
+});
+
+// ============================================================
+//  EXTEND TIME (as renter) 
+// ============================================================
+let currentExtendRentalId = null;
+
+window.openExtendTimeModal = function (rentalId) {
+    currentExtendRentalId = rentalId;
+    document.getElementById('extend-days-input').value = '1';
+    document.getElementById('extend-time-modal').classList.add('open');
+};
+
+document.getElementById('btn-submit-extend')?.addEventListener('click', async () => {
+    if (!currentExtendRentalId) return;
+    const days = parseInt(document.getElementById('extend-days-input').value, 10);
+    if (!days || days < 1) {
+        showToast('Please enter a valid number of days', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-submit-extend');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-icons-outlined" style="animation:spin 1s linear infinite;">sync</span>...';
+
+    try {
+        const res = await fetch(`${API_URL}/rentals/${currentExtendRentalId}/extend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ days })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+
+        showToast('Extension requested. Waiting for owner approval.', 'success');
+        document.getElementById('extend-time-modal').classList.remove('open');
+        currentExtendRentalId = null;
+        loadDashboard();
+    } catch (err) {
+        showToast(err.message || 'Failed to request extension', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons-outlined">update</span>Request Extension';
+    }
+});
+
+// ============================================================
+//  HANDLE EXTENSION STATUS (as owner)
+// ============================================================
+window.handleExtensionStatus = async function (rentalId, action) {
+    showCustomConfirm(
+        action === 'accept' ? 'Accept Extension' : 'Decline Extension',
+        `Are you sure you want to ${action} this time extension request?`,
+        action === 'accept' ? 'Accept' : 'Decline',
+        async () => {
+            try {
+                const res = await fetch(`${API_URL}/rentals/${rentalId}/extend-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+                    body: JSON.stringify({ action })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                showToast(`Extension ${action}ed successfully`, 'success');
+                loadDashboard();
+            } catch (err) {
+                showToast(err.message || `Failed to ${action} extension`, 'error');
+            }
+        }
+    );
+};
 
 // ============================================================
 //  UTILITY

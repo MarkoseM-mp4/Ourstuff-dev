@@ -17,6 +17,10 @@ const notificationSchema = new mongoose.Schema({
             'rental_completed',  // Rental marked complete (owner to renter)
             'rental_completed_renter', // Rental marked complete (renter to owner)
             'rental_cancelled',  // Rental cancelled
+            'rental_issue_reported', // Renter reported an issue
+            'rental_extension_requested', // Renter wants to extend
+            'rental_extension_accepted', // Owner accepted extension
+            'rental_extension_rejected', // Owner rejected extension
             'community_respond', // Someone responded to your community request
             'review_received',   // You got a new review
             'item_listed',       // Confirmation of item listed
