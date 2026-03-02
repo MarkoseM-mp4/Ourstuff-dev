@@ -183,7 +183,7 @@ async function loadRequests(page = 1) {
         document.getElementById('comm-skeleton').style.display = 'none';
 
         if (requests.length === 0) {
-            document.getElementById('comm-empty').style.display = 'block';
+            document.getElementById('comm-empty').style.display = 'flex';
             document.getElementById('comm-grid').style.display = 'none';
         } else {
             const grid = document.getElementById('comm-grid');
@@ -206,7 +206,7 @@ async function loadRequests(page = 1) {
 
     } catch (err) {
         document.getElementById('comm-skeleton').style.display = 'none';
-        document.getElementById('comm-empty').style.display = 'block';
+        document.getElementById('comm-empty').style.display = 'flex';
         document.getElementById('comm-stats-bar').style.display = 'none';
         console.error('Community load error:', err);
     }
