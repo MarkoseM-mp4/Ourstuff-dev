@@ -136,11 +136,15 @@ const updateRentalStatus = async (req, res, next) => {
 
         const originalStatus = rental.status;
         rental.status = status;
+
+        if (status === 'accepted') {
+            rental.deliveryOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
         await rental.save();
 
         // Block item dates on accept
         if (status === 'accepted') {
-            rental.deliveryOtp = Math.floor(100000 + Math.random() * 900000).toString();
             await Item.findByIdAndUpdate(rental.item._id, {
                 $push: { bookedDates: { from: rental.fromDate, to: rental.toDate } },
             });
